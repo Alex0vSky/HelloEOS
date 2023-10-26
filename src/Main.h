@@ -19,12 +19,17 @@
 #include "HumanReadable.h"
 #include "Credentials\Hardcode.h"
 #include "InitializeEOS.h"
+#include "Networking.h"
 #include "Synchronously\Auth.h"
 #include "Synchronously\Friend.h"
 #include "Synchronously\AccountMapping.h"
 #include "Synchronously\Presence.h"
+#include "Synchronously\Receive\BaseReceive.h"
+#include "Synchronously\Send\BaseSend.h"
 #include "Synchronously\Send\Chat.h"
+#include "Synchronously\Send\Bandwidth.h"
 #include "Synchronously\Receive\Chat.h"
+#include "Synchronously\Receive\Bandwidth.h"
 
 namespace syscross::HelloEOS {
 struct Main {
@@ -60,19 +65,32 @@ struct Main {
 			return;
 
 		if ( isServer ) {
-			LOG( "[~] isServer" );
-			Synchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
-			std::string message = chat.getMessage( );
-			LOG( "[~] message: %s", message.c_str( ) );
+			LOG( "[~] server" );
+
+//			Synchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
+//			std::string message = chat.getMessage( );
+//			LOG( "[~] message: %s", message.c_str( ) );
+
+			Synchronously::Receive::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ) );
+			if ( !bandwith.recvAndCheck( ) )
+				return;
+
 		} else {
 			LOG( "[~] client" );
-			Synchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-			char timeString[ 64 ];
-			std::time_t t = std::time( nullptr );
-			std::strftime( timeString, sizeof( timeString ), "%A %c", std::localtime( &t ) );
-			std::string message = timeString;
-			if ( !chat.message( message ) )
+
+//			Synchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+//			char timeString[ 64 ];
+//			std::time_t t = std::time( nullptr );
+//			std::strftime( timeString, sizeof( timeString ), "%A %c", std::localtime( &t ) );
+//			std::string message = timeString;
+//			if ( !chat.message( message ) )
+//				return;
+
+			Synchronously::Send::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+			size_t Bandwith;
+			if ( !bandwith.measure( &Bandwith ) )
 				return;
+
 		}
 		LOG( "[~] press any key to exit" );
 		getchar( );

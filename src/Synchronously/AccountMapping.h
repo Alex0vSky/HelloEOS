@@ -2,9 +2,9 @@
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
 namespace syscross::HelloEOS::Synchronously {
 class AccountMapping {
-	EOS_HPlatform m_PlatformHandle;
-	EOS_ProductUserId m_LocalUserId;
-	Friend::friends_t m_friends;
+	const EOS_HPlatform m_PlatformHandle;
+	const EOS_ProductUserId m_LocalUserId;
+	const Friend::friends_t m_friends;
 	EOS_ProductUserId m_FriendLocalUserId;
 
 	std::string ExternalAccountId;

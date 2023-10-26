@@ -71,6 +71,18 @@
     <ClInclude Include="..\src\Synchronously\Receive\Chat.h">
       <Filter>Header Files\Synchronously</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Synchronously\Receive\BaseReceive.h">
+      <Filter>Header Files\Synchronously</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Synchronously\Receive\Bandwidth.h">
+      <Filter>Header Files\Synchronously</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Synchronously\Send\Bandwidth.h">
+      <Filter>Header Files\Synchronously</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Synchronously\Send\BaseSend.h">
+      <Filter>Header Files\Synchronously</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resource\HelloEOS.rc">

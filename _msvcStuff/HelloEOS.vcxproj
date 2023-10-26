@@ -185,7 +185,11 @@
     <ClInclude Include="..\src\Synchronously\Auth.h" />
     <ClInclude Include="..\src\Synchronously\Friend.h" />
     <ClInclude Include="..\src\Synchronously\Presence.h" />
+    <ClInclude Include="..\src\Synchronously\Receive\Bandwidth.h" />
+    <ClInclude Include="..\src\Synchronously\Receive\BaseReceive.h" />
     <ClInclude Include="..\src\Synchronously\Receive\Chat.h" />
+    <ClInclude Include="..\src\Synchronously\Send\Bandwidth.h" />
+    <ClInclude Include="..\src\Synchronously\Send\BaseSend.h" />
     <ClInclude Include="..\src\Synchronously\Send\Chat.h" />
     <ClInclude Include="..\src\Version.h" />
     <ClInclude Include="stdafx.h" />
