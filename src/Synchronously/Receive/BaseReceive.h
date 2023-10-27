@@ -42,8 +42,10 @@ protected:
 		do { 
 			result = ::EOS_P2P_ReceivePacket( m_P2PHandle, &m_ReceivePacketOptions
 				, &friendAccountId, &m_SocketId, &channel, messageData.data(), &bytesWritten );
-			if ( EOS_EResult::EOS_Success == result )
+			if ( EOS_EResult::EOS_Success == result ) {
+				messageData.resize( bytesWritten );
 				break;
+			}
 			::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
 			if ( EOS_EResult::EOS_NotFound != result ) {

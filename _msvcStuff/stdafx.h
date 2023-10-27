@@ -1,6 +1,7 @@
 ﻿// stdafx.h - pch
 
 // System
+#define NOMINMAX
 #include <Windows.h>
 
 // Stl

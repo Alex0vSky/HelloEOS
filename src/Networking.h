@@ -7,6 +7,6 @@ struct Networking {
 	static const size_t c_MaxDataSizeBytes = 1170;
 
 //	( 5*1024*1024 ) / c_MaxDataSizeBytes = [LogEOSP2P] Unable to queue outgoing packet, queue is full! QueueSize=[5242854/5242880] NewPacketSize=[1194]
-	static const size_t c_countPackets = ( 4*1024*1024 ) / c_MaxDataSizeBytes;
+	static const size_t c_countPackets = ( 1*1024*1024 ) / c_MaxDataSizeBytes;
 };
 } // namespace syscross::HelloEOS

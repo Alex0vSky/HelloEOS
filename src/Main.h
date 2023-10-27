@@ -28,8 +28,10 @@
 #include "Synchronously\Send\BaseSend.h"
 #include "Synchronously\Send\Chat.h"
 #include "Synchronously\Send\Bandwidth.h"
+#include "Synchronously\Send\PingPong.h"
 #include "Synchronously\Receive\Chat.h"
 #include "Synchronously\Receive\Bandwidth.h"
+#include "Synchronously\Receive\PingPong.h"
 
 namespace syscross::HelloEOS {
 struct Main {
@@ -71,8 +73,12 @@ struct Main {
 //			std::string message = chat.getMessage( );
 //			LOG( "[~] message: %s", message.c_str( ) );
 
-			Synchronously::Receive::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ) );
-			if ( !bandwith.recvAndCheck( ) )
+//			Synchronously::Receive::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ) );
+//			if ( !bandwith.recvAndCheck( ) )
+//				return;
+
+			Synchronously::Receive::PingPong pingPong( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+			if ( !pingPong.recvPingAndAnswerPong( ) )
 				return;
 
 		} else {
@@ -86,9 +92,13 @@ struct Main {
 //			if ( !chat.message( message ) )
 //				return;
 
-			Synchronously::Send::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-			size_t Bandwith;
-			if ( !bandwith.measure( &Bandwith ) )
+//			Synchronously::Send::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+//			size_t Bandwith;
+//			if ( !bandwith.measure( &Bandwith ) )
+//				return;
+
+			Synchronously::Send::PingPong pingPong( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+			if ( !pingPong.sendPingWaitPong( ) )
 				return;
 
 		}

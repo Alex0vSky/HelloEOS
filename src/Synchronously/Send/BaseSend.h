@@ -20,7 +20,7 @@ protected:
 
 	template<typename T>
 	bool sendPacket_(const T &value) {
-		Networking::messageData_t messageData{ value.begin( ), value.end( ) };
+		Networking::messageData_t messageData( value.begin( ), value.end( ) );
 		auto dataLengthBytes = messageData.size( ) * sizeof( Networking::messageData_t::value_type );
 		m_Options.DataLengthBytes = static_cast<uint32_t>( dataLengthBytes );
 		m_Options.Data = messageData.data( );
