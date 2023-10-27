@@ -9,6 +9,9 @@
 #include <atomic>
 #include <thread>
 #include <vector>
+#include <future>
+//#include <coroutine>
+#include <chrono>
 
 // EOS
 #include "eos_auth.h"

@@ -9,10 +9,13 @@
 #include "eos_friends.h"
 #include "eos_presence.h"
 
-#include <iostream>
-#include <atomic>
-#include <thread>
-#include <vector>
+//#include <iostream>
+//#include <atomic>
+//#include <thread>
+//#include <vector>
+//#include <future>
+//#include <coroutine>
+//#include <chrono>
 
 #include "Version.h"
 #include "Log.h"
@@ -32,6 +35,8 @@
 #include "Synchronously\Receive\Chat.h"
 #include "Synchronously\Receive\Bandwidth.h"
 #include "Synchronously\Receive\PingPong.h"
+#include "Anchronously\Send\Chat.h"
+#include "Anchronously\Receive\Chat.h"
 
 namespace syscross::HelloEOS {
 struct Main {
@@ -66,28 +71,49 @@ struct Main {
 		if ( !presence.setOnlineAndTitle( ) )
 			return;
 
+		char timeString[ 64 ];
+		std::time_t t = std::time( nullptr );
+		std::strftime( timeString, sizeof( timeString ), "%A %c", std::localtime( &t ) );
+
 		if ( isServer ) {
 			LOG( "[~] server" );
 
 //			Synchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
 //			std::string message = chat.getMessage( );
-//			LOG( "[~] message: %s", message.c_str( ) );
+//			LOG( "[~] message: '%s'", message.c_str( ) );
 
 //			Synchronously::Receive::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ) );
 //			if ( !bandwith.recvAndCheck( ) )
 //				return;
 
-			Synchronously::Receive::PingPong pingPong( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-			if ( !pingPong.recvPingAndAnswerPong( ) )
+//			Synchronously::Receive::PingPong pingPong( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+//			if ( !pingPong.recvPingAndAnswerPong( ) )
+//				return;
+
+			Anchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
+			Networking::recv_t send = chat.getMessage( );
+
+			do { 
+				::EOS_Platform_Tick( platformHandle );
+				std::future_status fStat = send.wait_for( std::chrono::milliseconds( 1 ) );
+				if ( std::future_status::timeout != fStat )
+					break;
+				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
+			} while( true );
+
+			auto messageData = send.get( );
+			if ( messageData.empty( ) )
 				return;
+			std::string message( messageData.begin( ), messageData.end( ) );
+			LOG( "[~] message: '%s'", message.c_str( ) );
+
+//			using namespace std::chrono_literals;
+//			co_await 10s;
 
 		} else {
 			LOG( "[~] client" );
 
 //			Synchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-//			char timeString[ 64 ];
-//			std::time_t t = std::time( nullptr );
-//			std::strftime( timeString, sizeof( timeString ), "%A %c", std::localtime( &t ) );
 //			std::string message = timeString;
 //			if ( !chat.message( message ) )
 //				return;
@@ -97,9 +123,20 @@ struct Main {
 //			if ( !bandwith.measure( &Bandwith ) )
 //				return;
 
-			Synchronously::Send::PingPong pingPong( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-			if ( !pingPong.sendPingWaitPong( ) )
+//			Synchronously::Send::PingPong pingPong( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+//			if ( !pingPong.sendPingWaitPong( ) )
+//				return;
+
+			Anchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+			Networking::send_t send = chat.message( timeString );
+			bool b = send.get( );
+			if ( !b )
 				return;
+			LOG( "[~] press [Ctrl+C] to exit" );
+			do { 
+				::EOS_Platform_Tick( platformHandle );
+				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
+			} while( true );
 
 		}
 		LOG( "[~] press any key to exit" );

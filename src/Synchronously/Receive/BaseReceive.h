@@ -31,7 +31,7 @@ protected:
 	EOS_P2P_ReceivePacketOptions m_ReceivePacketOptions;
 	EOS_P2P_SocketId m_SocketId;
 
-	Networking::messageData_t receive_() {
+	Networking::messageData_t receive_(bool doTick = true) {
 		//Packet params
 		EOS_ProductUserId friendAccountId;
 		uint8_t channel = 0;
@@ -46,7 +46,8 @@ protected:
 				messageData.resize( bytesWritten );
 				break;
 			}
-			::EOS_Platform_Tick( m_PlatformHandle );
+			if ( doTick )
+				::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
 			if ( EOS_EResult::EOS_NotFound != result ) {
 				LOG( "[BaseReceive] error while reading data, code: %s.", EOS_EResult_ToString( result ) );
