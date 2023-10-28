@@ -141,8 +141,10 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>C:\Prj\_L\3d\EOS_SDK\SDK\Lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>delayimp.lib;</AdditionalDependencies>
-      <DelayLoadDLLs>dxgi.dll;dwrite.dll;d2d1.dll; d3d9.dll;d3dx9.dll;D3DX9_43.dll; d3d10_1.dll;d3dx10.dll; d3d11.dll;d3dcompiler.dll;D3DCompiler_47.dll; d3d11.dll;d3d11_3SDKLayers.dll; d3d12.dll;</DelayLoadDLLs>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
       <AdditionalOptions>/ignore:4199 /ignore:4204 /ignore:4099</AdditionalOptions>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
     </Link>
@@ -176,6 +178,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\resource\resource.h" />
+    <ClInclude Include="..\src\Anchronously\Ping.h" />
+    <ClInclude Include="..\src\Anchronously\Receive\Chat.h" />
+    <ClInclude Include="..\src\Anchronously\Send\Chat.h" />
     <ClInclude Include="..\src\Credentials\Hardcode.h" />
     <ClInclude Include="..\src\HumanReadable.h" />
     <ClInclude Include="..\src\InitializeEOS.h" />
@@ -188,9 +193,11 @@
     <ClInclude Include="..\src\Synchronously\Receive\Bandwidth.h" />
     <ClInclude Include="..\src\Synchronously\Receive\BaseReceive.h" />
     <ClInclude Include="..\src\Synchronously\Receive\Chat.h" />
+    <ClInclude Include="..\src\Synchronously\Receive\PingPong.h" />
     <ClInclude Include="..\src\Synchronously\Send\Bandwidth.h" />
     <ClInclude Include="..\src\Synchronously\Send\BaseSend.h" />
     <ClInclude Include="..\src\Synchronously\Send\Chat.h" />
+    <ClInclude Include="..\src\Synchronously\Send\PingPong.h" />
     <ClInclude Include="..\src\Version.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>

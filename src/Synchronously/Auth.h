@@ -67,7 +67,7 @@ public:
 		// Notification is approximately 10 minutes prior to expiration. ::EOS_Connect_AddNotifyAuthExpiration()
 		EOS_ELoginStatus status = (EOS_ELoginStatus)-1;
 		do {
-			::EOS_Platform_Tick( m_PlatformHandle );
+//			::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 1 } );
 			EOS_EpicAccountId acc = ::EOS_Auth_GetLoggedInAccountByIndex( Handle, 0 );
 			if ( !acc )
@@ -98,7 +98,7 @@ public:
 		::EOS_Connect_Login( ConnectHandle, &Options, this, ConnectLoginCompleteCb );
 		::EOS_Auth_Token_Release( UserAuthToken );
 		do {
-			::EOS_Platform_Tick( m_PlatformHandle );
+//			::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 1 } );
 		} while ( !m_LocalUserId );
 		// TODO(alex): void FAuthentication::PrintAuthToken(EOS_Auth_Token* InAuthToken)

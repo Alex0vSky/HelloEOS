@@ -2,7 +2,7 @@
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
 namespace syscross::HelloEOS {
 class InitializeEOS {
-	EOS_HPlatform m_PlatformHandle;
+	EOS_HPlatform m_PlatformHandle = nullptr;
 
 	static void EOSSDKLoggingCallback_(const EOS_LogMessage* InMsg) {
 		LOG( "[%s] %s", InMsg ->Category, InMsg ->Message );
@@ -13,12 +13,11 @@ class InitializeEOS {
 	
 public:
 	~InitializeEOS() {
-		EOS_EResult Result;
-		::EOS_Platform_Release( m_PlatformHandle );
-		Result = ::EOS_Shutdown( );
+		if ( m_PlatformHandle )
+			::EOS_Platform_Release( m_PlatformHandle );
+		::EOS_Shutdown( );
 	}
-	bool doit() {
-
+	void initialize() {
 		EOS_InitializeOptions SDKOptions = { };
 		SDKOptions.ApiVersion = EOS_INITIALIZE_API_LATEST;
 		SDKOptions.AllocateMemoryFunction = nullptr;
@@ -30,14 +29,14 @@ public:
 		SDKOptions.OverrideThreadAffinity = nullptr;
 		EOS_EResult InitResult = ::EOS_Initialize(&SDKOptions);
 		if ( InitResult != EOS_EResult::EOS_Success ) {
-			LOG( "[run] Init Failed!" );
-			return false;
+			LOG( "[InitializeEOS] EOS_Initialize" );
+			throw std::runtime_error( "error EOS_Initialize" );
 		}
 
 		EOS_EResult SetLogCallbackResult = ::EOS_Logging_SetCallback( &EOSSDKLoggingCallback_ );
 		if ( EOS_EResult::EOS_Success != SetLogCallbackResult ) {
-			LOG( "[EOS SDK] Set Logging Callback Failed!" );
-			return false;
+			LOG( "[InitializeEOS] EOS_Logging_SetCallback" );
+			throw std::runtime_error( "error EOS_Logging_SetCallback" );
 		}
 		//::EOS_Logging_SetLogLevel( EOS_ELogCategory::EOS_LC_ALL_CATEGORIES, EOS_ELogLevel::EOS_LOG_VeryVerbose );
 		::EOS_Logging_SetLogLevel( EOS_ELogCategory::EOS_LC_ALL_CATEGORIES, EOS_ELogLevel::EOS_LOG_Info );
@@ -78,8 +77,10 @@ public:
 		m_PlatformHandle = ::EOS_Platform_Create( &PlatformOptions );
 		if (PlatformOptions.IntegratedPlatformOptionsContainerHandle)
 			::EOS_IntegratedPlatformOptionsContainer_Release( PlatformOptions.IntegratedPlatformOptionsContainerHandle );
-
-		return true;
+		if ( !m_PlatformHandle ) {
+			LOG( "[InitializeEOS] EOS_Platform_Create" );
+			throw std::runtime_error( "error EOS_Platform_Create" );
+		}
 	}
 
 	EOS_HPlatform getPlatformHandle() const {

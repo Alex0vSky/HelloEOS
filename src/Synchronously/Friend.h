@@ -84,7 +84,7 @@ public:
 		m_bFriends = false;
 		::EOS_Friends_QueryFriends( FriendsHandle, &QueryFriendsOptions, this, QueryFriendsCompleteCallbackFn );
 		do {
-			::EOS_Platform_Tick( m_PlatformHandle );
+//			::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 1 } );
 		} while( !m_bFriends );
 		return m_NewFriends;

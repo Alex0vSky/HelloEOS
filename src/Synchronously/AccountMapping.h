@@ -69,7 +69,7 @@ public:
 		::EOS_Connect_QueryExternalAccountMappings( 
 			ConnectHandle, &QueryOptions, this, OnQueryExternalAccountMappingsCallback );
 		do {
-			::EOS_Platform_Tick( m_PlatformHandle );
+//			::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 1 } );
 		} while( !m_bMapping );
  		return true;

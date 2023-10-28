@@ -1,13 +1,13 @@
 // src\Main.h - code main class, for unittests code coverage
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
-#include "eos_auth.h"
-#include "eos_sdk.h"
-#include "eos_types.h"
-#include "Windows/eos_Windows.h"
-#include "eos_logging.h"
-#include "eos_p2p.h"
-#include "eos_friends.h"
-#include "eos_presence.h"
+//#include "eos_auth.h"
+//#include "eos_sdk.h"
+//#include "eos_types.h"
+//#include "Windows/eos_Windows.h"
+//#include "eos_logging.h"
+//#include "eos_p2p.h"
+//#include "eos_friends.h"
+//#include "eos_presence.h"
 
 //#include <iostream>
 //#include <atomic>
@@ -37,16 +37,53 @@
 #include "Synchronously\Receive\PingPong.h"
 #include "Anchronously\Send\Chat.h"
 #include "Anchronously\Receive\Chat.h"
+#include "Anchronously\Ping.h"
 
 namespace syscross::HelloEOS {
 struct Main {
 	void run(int argc) {
 		bool isServer = ( argc > 1 );
 
-		InitializeEOS init;
-		if ( !init.doit( ) )
-			return;
-		EOS_HPlatform platformHandle = init.getPlatformHandle( );
+		//InitializeEOS init;
+		//if ( !init.initialize( ) )
+		//	return;
+		//EOS_HPlatform platformHandle = init.getPlatformHandle( );
+
+		// GameThread
+		class Ticker {
+			typedef std::chrono::milliseconds milli_t;
+			InitializeEOS m_initializeEOS;
+			std::atomic< EOS_HPlatform > m_platformHandle = nullptr;
+			std::atomic< milli_t > m_sleep = milli_t( 100 );
+			std::thread m_thread;
+			void run() {
+				m_initializeEOS.initialize( );
+				m_platformHandle = m_initializeEOS.getPlatformHandle( );
+				m_platformHandle.notify_one( );
+				EOS_HPlatform platformHandle = m_platformHandle;
+				while( true ) {
+					::EOS_Platform_Tick( platformHandle );
+					std::this_thread::sleep_for( static_cast< milli_t >( m_sleep ) );
+				}
+			}
+		public: 
+			Ticker() {
+				m_thread = std::thread( &Ticker::run, this );
+			}
+			milli_t setSleep(milli_t milli) {
+				milli_t tmp;
+				return tmp = m_sleep, m_sleep = milli, tmp;
+			}
+			EOS_HPlatform waitPlatformHandle() const {
+				if ( std::this_thread::get_id( ) == m_thread.get_id( ) )
+					throw std::runtime_error( "must be called from another thread" );
+				m_platformHandle.wait( nullptr );
+				return m_platformHandle;
+			}
+		};
+		Ticker ticker;
+		EOS_HPlatform platformHandle = ticker.waitPlatformHandle( );
+
 		Synchronously::Auth auth( platformHandle );
 		std::string tokenDevAuthToolAuth;
 		if ( isServer )
@@ -90,22 +127,20 @@ struct Main {
 //			if ( !pingPong.recvPingAndAnswerPong( ) )
 //				return;
 
-			Anchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
-			Networking::recv_t send = chat.getMessage( );
-
-			do { 
-				::EOS_Platform_Tick( platformHandle );
-				std::future_status fStat = send.wait_for( std::chrono::milliseconds( 1 ) );
-				if ( std::future_status::timeout != fStat )
-					break;
-				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
-			} while( true );
-
-			auto messageData = send.get( );
-			if ( messageData.empty( ) )
-				return;
-			std::string message( messageData.begin( ), messageData.end( ) );
-			LOG( "[~] message: '%s'", message.c_str( ) );
+//			Anchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
+//			Networking::recv_t future = chat.getMessage( );
+//			do { 
+//				::EOS_Platform_Tick( platformHandle );
+//				std::future_status fStat = future.wait_for( std::chrono::milliseconds( 1 ) );
+//				if ( std::future_status::timeout != fStat )
+//					break;
+//				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
+//			} while( true );
+//			auto messageData = future.get( );
+//			if ( messageData.empty( ) )
+//				return;
+//			std::string message( messageData.begin( ), messageData.end( ) );
+//			LOG( "[~] message: '%s'", message.c_str( ) );
 
 //			using namespace std::chrono_literals;
 //			co_await 10s;
@@ -113,10 +148,10 @@ struct Main {
 		} else {
 			LOG( "[~] client" );
 
-//			Synchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-//			std::string message = timeString;
-//			if ( !chat.message( message ) )
-//				return;
+			Synchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+			std::string message = timeString;
+			if ( !chat.message( message ) )
+				return;
 
 //			Synchronously::Send::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
 //			size_t Bandwith;
@@ -127,16 +162,36 @@ struct Main {
 //			if ( !pingPong.sendPingWaitPong( ) )
 //				return;
 
-			Anchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-			Networking::send_t send = chat.message( timeString );
-			bool b = send.get( );
-			if ( !b )
-				return;
-			LOG( "[~] press [Ctrl+C] to exit" );
-			do { 
-				::EOS_Platform_Tick( platformHandle );
-				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
-			} while( true );
+//			Anchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+//			Networking::send_t future = chat.message( timeString );
+//			bool b = future.get( );
+//			if ( !b )
+//				return;
+//			LOG( "[~] press [Ctrl+C] to exit" );
+//			do { 
+//				::EOS_Platform_Tick( platformHandle );
+//				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
+//			} while( true );
+
+//			Anchronously::Ping ping( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+//			std::chrono::milliseconds duration;
+//			Networking::ping_t future1 = ping.measure( &duration );
+//			Networking::ping_t future2;
+//			Networking::ping_t *pfuture = &future1;
+//			do { 
+//				::EOS_Platform_Tick( platformHandle );
+//				std::future_status fStat = pfuture ->wait_for( std::chrono::milliseconds( 1 ) );
+//				if ( std::future_status::timeout != fStat ) {
+//					if ( pfuture == &future2 ) 
+//						break;
+//					// Second after warmup 
+//					future2 = ping.measure( &duration );
+//				}
+//				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
+//			} while( true );
+//			if ( !future2.get( ) )
+//				return;
+//			LOG( "[~] ping: %lld ms", duration.count( ) );
 
 		}
 		LOG( "[~] press any key to exit" );

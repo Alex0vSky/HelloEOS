@@ -21,5 +21,7 @@
 #include "eos_logging.h"
 #include "eos_p2p.h"
 #include "eos_friends.h"
+#include "eos_presence.h"
+
 
 #pragma comment( lib, "EOSSDK-Win64-Shipping" )

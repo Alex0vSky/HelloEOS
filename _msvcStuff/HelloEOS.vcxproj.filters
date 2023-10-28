@@ -19,6 +19,12 @@
     <Filter Include="Header Files\Synchronously">
       <UniqueIdentifier>{63dd9275-c9ec-4403-85f2-5984198d339a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Credentials">
+      <UniqueIdentifier>{61cbdfff-d587-4f0e-9ff2-0c86e4bedbd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Anchronously">
+      <UniqueIdentifier>{7592e56d-45df-4570-861b-a3ebe56531ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -50,9 +56,6 @@
     <ClInclude Include="..\src\Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Credentials\Hardcode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Synchronously\AccountMapping.h">
       <Filter>Header Files\Synchronously</Filter>
     </ClInclude>
@@ -82,6 +85,24 @@
     </ClInclude>
     <ClInclude Include="..\src\Synchronously\Send\BaseSend.h">
       <Filter>Header Files\Synchronously</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Synchronously\Send\PingPong.h">
+      <Filter>Header Files\Synchronously</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Synchronously\Receive\PingPong.h">
+      <Filter>Header Files\Synchronously</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Credentials\Hardcode.h">
+      <Filter>Header Files\Credentials</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Anchronously\Ping.h">
+      <Filter>Header Files\Anchronously</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Anchronously\Receive\Chat.h">
+      <Filter>Header Files\Anchronously</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Anchronously\Send\Chat.h">
+      <Filter>Header Files\Anchronously</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -63,7 +63,7 @@ public:
 		::EOS_PresenceModification_Release( PresenceModification );
 
 		do {
-			::EOS_Platform_Tick( m_PlatformHandle );
+//			::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 1 } );
 		} while( !m_bPresence );
 		// TODO(alex):
