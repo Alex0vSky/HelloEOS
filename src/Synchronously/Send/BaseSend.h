@@ -28,7 +28,7 @@ protected:
 		return EOS_EResult::EOS_Success == Result;
 	}
 	bool sendTextPacket_(const std::string &value) {
-		sendPacket_( value );
+		return sendPacket_( value );
 	}
 
 public:

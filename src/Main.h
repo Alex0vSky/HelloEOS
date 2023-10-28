@@ -135,6 +135,9 @@ namespace syscross::HelloEOS { struct Main {
 			fifo.pop_front( );
 
 			Anchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+
+			auto x = chat.message2( timeString );
+
 			Networking::send_t future = chat.message( timeString );
 			bool b = future.get( );
 			if ( !b )
