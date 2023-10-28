@@ -1,11 +1,8 @@
 // src\Anchronously\Send\Chat.h - 
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
 namespace syscross::HelloEOS::Anchronously::Send { 
-static class Chat *g_chat; // tmp
 class Chat : public Synchronously::Send::BaseSend {
 	using BaseSend::BaseSend;
-//	using BaseSend::sendTextPacket_;
-//	//using Base<int>::print;
 
 public:
 	struct ExecutableCommand {
@@ -21,40 +18,20 @@ public:
 		return future;
 	}
 
-
 	// @insp https://stackoverflow.com/questions/69692722/how-can-i-have-a-function-pointer-template-as-a-template-parameter
 	template <typename T, typename R, typename... Args>
-	class EngineSystem {
+	struct Deduced {
 		std::function< R(Args... args) > m_function;
-	public:
-		EngineSystem(R (T::*function)(Args... args), T *that) : 
-			m_function( std::bind( function, that, std::placeholders::_1 ) )
-		{}
-		R call(Args... args) {
-			return m_function( args... );
-		}
 	};
 
-	template <typename T, typename T2, typename R, typename... Args>
-	auto makeEngine(R (T::*fun)(Args... args), T2 *that) {
-		return EngineSystem< T, R, Args... >( fun, that );
+	template <typename T, typename R, typename... Args>
+	auto makeDeduce(R (T::*fun)(Args... args)) {
+		return Deduced< T, R, Args... >{ };
 	}
-
-	bool foo(const std::string &text) {
-		return true;
-	}
-
-//	bool sendTextPacket_(const std::string &value) = delete;
 	auto message2(const std::string &text) {
-		g_chat = this;
-//		auto executableCommand = makeEngine( &Chat::foo, this );
-		auto executableCommand = makeEngine( 
-			&Chat::sendTextPacket_
-			, this 
-		);
-		//executableCommand.function = std::bind( &Chat::sendTextPacket_, this, std::placeholders::_1 );
-		//executableCommand.function( text );
-		executableCommand.call( text );
+		auto executableCommand = makeDeduce( &Chat::sendTextPacket_ );
+		executableCommand.m_function = std::bind( &Chat::sendTextPacket_, this, std::placeholders::_1 );
+		executableCommand.m_function( text );
 
 		return executableCommand;
 	}
