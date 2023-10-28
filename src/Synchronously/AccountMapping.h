@@ -52,7 +52,7 @@ public:
 		, m_friends( friends )
 	{}
 
-	bool getFirstFriendId() {
+	bool getFirstFriendId(bool doTick = true) {
 
 		ExternalAccountId = HumanReadable::EpicAccountIDToString_( m_friends[ 0 ].UserId );
 		ExternalAccountsToQuery.push_back( ExternalAccountId.c_str( ) );
@@ -69,7 +69,7 @@ public:
 		::EOS_Connect_QueryExternalAccountMappings( 
 			ConnectHandle, &QueryOptions, this, OnQueryExternalAccountMappingsCallback );
 		do {
-//			::EOS_Platform_Tick( m_PlatformHandle );
+			if ( doTick ) ::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 1 } );
 		} while( !m_bMapping );
  		return true;

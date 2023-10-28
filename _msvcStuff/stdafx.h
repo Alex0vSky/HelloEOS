@@ -14,6 +14,7 @@
 #include <chrono>
 #include <sstream>
 #include <iomanip>
+#include <deque>
 
 // EOS
 #include "eos_auth.h"

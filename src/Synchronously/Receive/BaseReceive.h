@@ -46,7 +46,7 @@ protected:
 				messageData.resize( bytesWritten );
 				break;
 			}
-			//if ( doTick ) ::EOS_Platform_Tick( m_PlatformHandle );
+			if ( doTick ) ::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
 			if ( EOS_EResult::EOS_NotFound != result ) {
 				LOG( "[BaseReceive] error while reading data, code: %s.", EOS_EResult_ToString( result ) );
@@ -80,8 +80,10 @@ public:
 
 		EOS_NotificationId connectionNotificationId = ::EOS_P2P_AddNotifyPeerConnectionRequest(
 			m_P2PHandle, &connectionRequestOptions, this, OnIncomingConnectionRequest_ );
-		if ( connectionNotificationId == EOS_INVALID_NOTIFICATIONID )
-			LOG( "EOS P2PNAT SubscribeToConnectionRequests: could not subscribe, bad notification id returned.");
+		if ( connectionNotificationId == EOS_INVALID_NOTIFICATIONID ) {
+			LOG( "[BaseReceive] could not subscribe, bad notification id returned.");
+			throw std::runtime_error( "error EOS_P2P_AddNotifyPeerConnectionRequest");
+		}
 
 		m_ReceivePacketOptions.ApiVersion = EOS_P2P_RECEIVEPACKET_API_LATEST;
 		m_ReceivePacketOptions.LocalUserId = m_LocalUserId;

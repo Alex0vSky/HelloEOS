@@ -76,7 +76,7 @@ public:
 		, m_epicAccountId( epicAccountId )
 	{}
 
-	friends_t getAll() {
+	friends_t getAll(bool doTick = true) {
 		EOS_HFriends FriendsHandle = ::EOS_Platform_GetFriendsInterface( m_PlatformHandle );
 		EOS_Friends_QueryFriendsOptions QueryFriendsOptions = {};
 		QueryFriendsOptions.ApiVersion = EOS_FRIENDS_QUERYFRIENDS_API_LATEST;
@@ -84,7 +84,7 @@ public:
 		m_bFriends = false;
 		::EOS_Friends_QueryFriends( FriendsHandle, &QueryFriendsOptions, this, QueryFriendsCompleteCallbackFn );
 		do {
-//			::EOS_Platform_Tick( m_PlatformHandle );
+			if ( doTick ) ::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 1 } );
 		} while( !m_bFriends );
 		return m_NewFriends;

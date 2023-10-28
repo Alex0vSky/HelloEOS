@@ -39,43 +39,14 @@
 #include "Anchronously\Receive\Chat.h"
 #include "Anchronously\Ping.h"
 
-namespace syscross::HelloEOS {
-struct Main {
+namespace syscross::HelloEOS { struct Main {
 	void run(int argc) {
 		bool isServer = ( argc > 1 );
-
-		//InitializeEOS init;
-		//if ( !init.initialize( ) )
-		//	return;
-		//EOS_HPlatform platformHandle = init.getPlatformHandle( );
-
-		// GameThread
-		class Ticker {
-			InitializeEOS m_initializeEOS;
-			std::atomic< EOS_HPlatform > m_platformHandle = nullptr;
-			std::thread m_thread;
-			void run() {
-				m_platformHandle = m_initializeEOS.initialize( );
-				EOS_HPlatform platformHandle = m_platformHandle;
-				while ( true ) {
-					::EOS_Platform_Tick( platformHandle );
-					std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
-				}
-			}
-		public: 
-			Ticker() {
-				m_thread = std::thread( &Ticker::run, this );
-			}
-			EOS_HPlatform waitPlatformHandle() const {
-				if ( std::this_thread::get_id( ) == m_thread.get_id( ) )
-					throw std::runtime_error( "must be called from another thread" );
-				while ( !m_platformHandle )
-					std::this_thread::sleep_for( std::chrono::milliseconds{ 1 } );
-				return m_platformHandle;
-			}
-		};
-		Ticker ticker;
-		EOS_HPlatform platformHandle = ticker.waitPlatformHandle( );
+#pragma region prepare
+		InitializeEOS init;
+		EOS_HPlatform platformHandle = init.initialize( );
+		if ( !platformHandle )
+			return;
 
 		Synchronously::Auth auth( platformHandle );
 		std::string tokenDevAuthToolAuth;
@@ -83,7 +54,7 @@ struct Main {
 			tokenDevAuthToolAuth = "cred2";
 		else
 			tokenDevAuthToolAuth = "cred1";
-		if ( !auth.connectAndLogin( tokenDevAuthToolAuth, false ) )
+		if ( !auth.connectAndLogin( tokenDevAuthToolAuth ) )
 			return;
 		LOG( "[~] auth.getLocalUserId( ) valid: %s", ( ::EOS_ProductUserId_IsValid( auth.getLocalUserId( ) ) ?"TRUE" :"FALSE" ) );
 
@@ -104,6 +75,7 @@ struct Main {
 		char timeString[ 64 ];
 		std::time_t t = std::time( nullptr );
 		std::strftime( timeString, sizeof( timeString ), "%A %c", std::localtime( &t ) );
+#pragma endregion // prepare
 
 		if ( isServer ) {
 			LOG( "[~] server" );
@@ -141,10 +113,10 @@ struct Main {
 		} else {
 			LOG( "[~] client" );
 
-			Synchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-			std::string message = timeString;
-			if ( !chat.message( message ) )
-				return;
+//			Synchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+//			std::string message = timeString;
+//			if ( !chat.message( message ) )
+//				return;
 
 //			Synchronously::Send::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
 //			size_t Bandwith;
@@ -155,16 +127,23 @@ struct Main {
 //			if ( !pingPong.sendPingWaitPong( ) )
 //				return;
 
-//			Anchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-//			Networking::send_t future = chat.message( timeString );
-//			bool b = future.get( );
-//			if ( !b )
-//				return;
-//			LOG( "[~] press [Ctrl+C] to exit" );
-//			do { 
-//				::EOS_Platform_Tick( platformHandle );
-//				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
-//			} while( true );
+			//std::vector< int > vec;
+			std::deque< int > fifo;
+			fifo.push_back( 1 );
+			fifo.push_back( 2 );
+			int n = fifo.front( );
+			fifo.pop_front( );
+
+			Anchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+			Networking::send_t future = chat.message( timeString );
+			bool b = future.get( );
+			if ( !b )
+				return;
+			LOG( "[~] press [Ctrl+C] to exit" );
+			do { 
+				::EOS_Platform_Tick( platformHandle );
+				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
+			} while( true );
 
 //			Anchronously::Ping ping( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
 //			std::chrono::milliseconds duration;

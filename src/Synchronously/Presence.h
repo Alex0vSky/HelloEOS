@@ -27,7 +27,7 @@ public:
 		, m_epicAccountId( epicAccountId )
 	{}
 
-	bool setOnlineAndTitle() {
+	bool setOnlineAndTitle(bool doTick = true) {
 		m_bPresence = false;
 		EOS_EResult Result;
 		std::string RichText = "Using P2P NAT";
@@ -63,7 +63,7 @@ public:
 		::EOS_PresenceModification_Release( PresenceModification );
 
 		do {
-//			::EOS_Platform_Tick( m_PlatformHandle );
+			if ( doTick ) ::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 1 } );
 		} while( !m_bPresence );
 		// TODO(alex):

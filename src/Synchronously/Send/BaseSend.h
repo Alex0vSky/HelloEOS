@@ -11,9 +11,9 @@ protected:
 	EOS_P2P_SendPacketOptions m_Options;
 	std::atomic_bool m_bStop = false;
 
-	void ticks_() const {
+	void ticks_(bool doTick = true) const {
 		do {
-//			::EOS_Platform_Tick( m_PlatformHandle );
+			if ( doTick ) ::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 1 } );
 		} while( !m_bStop );
 	}
@@ -26,6 +26,9 @@ protected:
 		m_Options.Data = messageData.data( );
 		EOS_EResult Result = ::EOS_P2P_SendPacket( m_P2PHandle, &m_Options );
 		return EOS_EResult::EOS_Success == Result;
+	}
+	bool sendTextPacket_(const std::string &value) {
+		sendPacket_( value );
 	}
 
 public:
