@@ -7,10 +7,15 @@
 			constexpr bool bWchar = std::is_convertible_v< decltype( fmt ), const wchar_t * >;			\
 			constexpr bool bChar = std::is_convertible_v< decltype( fmt ), const char * >;				\
 			static_assert( bWchar || bChar, "Print only wchar_t or char strings");						\
-			auto now_in_sys = floor< milliseconds >( system_clock::now( ) );							\
-			auto now_in_local = current_zone( ) ->to_local( now_in_sys );								\
-			std::string dateTimeA = std::format( "{0:%T} ", now_in_local );								\
-			std::wstring dateTimeW = std::format( L"{0:%T} ", now_in_local );							\
+			auto now = system_clock::now();																\
+			auto ms = duration_cast<milliseconds>(now.time_since_epoch()) % 1000;						\
+			auto timer = system_clock::to_time_t(now);													\
+			std::tm bt = *std::localtime(&timer);														\
+			std::ostringstream ossA;																	\
+			ossA << std::put_time(&bt, "%T");															\
+			ossA << '.' << std::setfill('0') << std::setw(3) << ms.count() << " ";						\
+			std::string dateTimeA = ossA.str( );														\
+			std::wstring dateTimeW( dateTimeA.begin(), dateTimeA.end() );								\
 			size_t len;																					\
 			bChar																						\
 				? len = snprintf( nullptr, 0, (const char *)( fmt ), __VA_ARGS__ )						\

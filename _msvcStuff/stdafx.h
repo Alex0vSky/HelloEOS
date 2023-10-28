@@ -12,6 +12,8 @@
 #include <future>
 //#include <coroutine>
 #include <chrono>
+#include <sstream>
+#include <iomanip>
 
 // EOS
 #include "eos_auth.h"

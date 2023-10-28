@@ -51,33 +51,26 @@ struct Main {
 
 		// GameThread
 		class Ticker {
-			typedef std::chrono::milliseconds milli_t;
 			InitializeEOS m_initializeEOS;
 			std::atomic< EOS_HPlatform > m_platformHandle = nullptr;
-			std::atomic< milli_t > m_sleep = milli_t( 100 );
 			std::thread m_thread;
 			void run() {
-				m_initializeEOS.initialize( );
-				m_platformHandle = m_initializeEOS.getPlatformHandle( );
-				m_platformHandle.notify_one( );
+				m_platformHandle = m_initializeEOS.initialize( );
 				EOS_HPlatform platformHandle = m_platformHandle;
-				while( true ) {
+				while ( true ) {
 					::EOS_Platform_Tick( platformHandle );
-					std::this_thread::sleep_for( static_cast< milli_t >( m_sleep ) );
+					std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
 				}
 			}
 		public: 
 			Ticker() {
 				m_thread = std::thread( &Ticker::run, this );
 			}
-			milli_t setSleep(milli_t milli) {
-				milli_t tmp;
-				return tmp = m_sleep, m_sleep = milli, tmp;
-			}
 			EOS_HPlatform waitPlatformHandle() const {
 				if ( std::this_thread::get_id( ) == m_thread.get_id( ) )
 					throw std::runtime_error( "must be called from another thread" );
-				m_platformHandle.wait( nullptr );
+				while ( !m_platformHandle )
+					std::this_thread::sleep_for( std::chrono::milliseconds{ 1 } );
 				return m_platformHandle;
 			}
 		};
@@ -90,7 +83,7 @@ struct Main {
 			tokenDevAuthToolAuth = "cred2";
 		else
 			tokenDevAuthToolAuth = "cred1";
-		if ( !auth.connectAndLogin( tokenDevAuthToolAuth ) )
+		if ( !auth.connectAndLogin( tokenDevAuthToolAuth, false ) )
 			return;
 		LOG( "[~] auth.getLocalUserId( ) valid: %s", ( ::EOS_ProductUserId_IsValid( auth.getLocalUserId( ) ) ?"TRUE" :"FALSE" ) );
 
@@ -115,9 +108,9 @@ struct Main {
 		if ( isServer ) {
 			LOG( "[~] server" );
 
-//			Synchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
-//			std::string message = chat.getMessage( );
-//			LOG( "[~] message: '%s'", message.c_str( ) );
+			Synchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
+			std::string message = chat.getMessage( );
+			LOG( "[~] message: '%s'", message.c_str( ) );
 
 //			Synchronously::Receive::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ) );
 //			if ( !bandwith.recvAndCheck( ) )

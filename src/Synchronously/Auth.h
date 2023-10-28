@@ -40,9 +40,9 @@ public:
 		m_PlatformHandle( platformHandle )
 	{}
 
-	bool connectAndLogin(const std::string &Token) {
+	bool connectAndLogin(const std::string &Token, bool doTick = true) {
 
-		EOS_HAuth Handle = ::EOS_Platform_GetAuthInterface( m_PlatformHandle );
+		EOS_HAuth AuthHandle = ::EOS_Platform_GetAuthInterface( m_PlatformHandle );
 		{
 			EOS_Auth_Credentials Credentials = { };
 			Credentials.ApiVersion = EOS_AUTH_CREDENTIALS_API_LATEST;
@@ -55,24 +55,23 @@ public:
 			Options.Credentials = &Credentials;
 			Credentials.Id = "localhost:10000";
 			Credentials.Token = Token.c_str( );
-			//Credentials.Token = "credX";
 			Credentials.Type = EOS_ELoginCredentialType::EOS_LCT_Developer;
 			LOG( "[Auth/Synchronously] Logging In with Host: %s", Credentials.Id );
 
 			::SetLastError( 0 );
 			m_bSuccess = false;
 			m_bError = false;
-			::EOS_Auth_Login( Handle, &Options, this, LoginCompleteCallbackFn );
+			::EOS_Auth_Login( AuthHandle, &Options, this, LoginCompleteCallbackFn );
 		}
 		// Notification is approximately 10 minutes prior to expiration. ::EOS_Connect_AddNotifyAuthExpiration()
 		EOS_ELoginStatus status = (EOS_ELoginStatus)-1;
 		do {
-//			::EOS_Platform_Tick( m_PlatformHandle );
+			if ( doTick ) ::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 1 } );
-			EOS_EpicAccountId acc = ::EOS_Auth_GetLoggedInAccountByIndex( Handle, 0 );
-			if ( !acc )
-				continue;
-			status = ::EOS_Auth_GetLoginStatus( Handle, acc ); //} while ( EOS_ELoginStatus::EOS_LS_LoggedIn != status && !m_bError);
+			//EOS_EpicAccountId acc = ::EOS_Auth_GetLoggedInAccountByIndex( AuthHandle, 0 );
+			//if ( !acc )
+			//	continue;
+			//status = ::EOS_Auth_GetLoginStatus( AuthHandle, acc ); //} while ( EOS_ELoginStatus::EOS_LS_LoggedIn != status && !m_bError);
 		} while ( !m_bSuccess && !m_bError );
 		if ( m_bError ) 
 			return false;
@@ -81,7 +80,7 @@ public:
 		EOS_Auth_Token* UserAuthToken = nullptr;
 		EOS_Auth_CopyUserAuthTokenOptions CopyTokenOptions = { };
 		CopyTokenOptions.ApiVersion = EOS_AUTH_COPYUSERAUTHTOKEN_API_LATEST;
-		if ( EOS_EResult::EOS_Success != ::EOS_Auth_CopyUserAuthToken( Handle, &CopyTokenOptions, m_Account, &UserAuthToken ) )
+		if ( EOS_EResult::EOS_Success != ::EOS_Auth_CopyUserAuthToken( AuthHandle, &CopyTokenOptions, m_Account, &UserAuthToken ) )
 			return false;
 		EOS_Connect_Credentials Credentials = { };
 		Credentials.ApiVersion = EOS_CONNECT_CREDENTIALS_API_LATEST;
@@ -98,7 +97,7 @@ public:
 		::EOS_Connect_Login( ConnectHandle, &Options, this, ConnectLoginCompleteCb );
 		::EOS_Auth_Token_Release( UserAuthToken );
 		do {
-//			::EOS_Platform_Tick( m_PlatformHandle );
+			if ( doTick ) ::EOS_Platform_Tick( m_PlatformHandle );
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 1 } );
 		} while ( !m_LocalUserId );
 		// TODO(alex): void FAuthentication::PrintAuthToken(EOS_Auth_Token* InAuthToken)

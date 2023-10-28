@@ -17,7 +17,7 @@ public:
 			::EOS_Platform_Release( m_PlatformHandle );
 		::EOS_Shutdown( );
 	}
-	void initialize() {
+	EOS_HPlatform initialize() {
 		EOS_InitializeOptions SDKOptions = { };
 		SDKOptions.ApiVersion = EOS_INITIALIZE_API_LATEST;
 		SDKOptions.AllocateMemoryFunction = nullptr;
@@ -81,6 +81,7 @@ public:
 			LOG( "[InitializeEOS] EOS_Platform_Create" );
 			throw std::runtime_error( "error EOS_Platform_Create" );
 		}
+		return m_PlatformHandle;
 	}
 
 	EOS_HPlatform getPlatformHandle() const {
