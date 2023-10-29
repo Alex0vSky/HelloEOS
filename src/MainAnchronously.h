@@ -1,4 +1,4 @@
-// src\Main.h - code main class, for unittests code coverage
+// src\MainAnchronously.h - code main class, for unittests code coverage
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
 //#include "eos_auth.h"
 //#include "eos_sdk.h"
@@ -20,27 +20,32 @@
 #include "Version.h"
 #include "Log.h"
 #include "HumanReadable.h"
-#include "Credentials\Hardcode.h"
+#include "Credentials/Hardcode.h"
 #include "InitializeEOS.h"
 #include "Networking.h"
-#include "Synchronously\Auth.h"
-#include "Synchronously\Friend.h"
-#include "Synchronously\AccountMapping.h"
-#include "Synchronously\Presence.h"
-#include "Synchronously\Receive\BaseReceive.h"
-#include "Synchronously\Send\BaseSend.h"
-#include "Synchronously\Send\Chat.h"
-#include "Synchronously\Send\Bandwidth.h"
-#include "Synchronously\Send\PingPong.h"
-#include "Synchronously\Receive\Chat.h"
-#include "Synchronously\Receive\Bandwidth.h"
-#include "Synchronously\Receive\PingPong.h"
-#include "Anchronously\Acme.h"
-#include "Anchronously\Send\Chat.h"
-#include "Anchronously\Receive\Chat.h"
-#include "Anchronously\Ping.h"
+#include "Synchronously/Auth.h"
+#include "Synchronously/Friend.h"
+#include "Synchronously/AccountMapping.h"
+#include "Synchronously/Presence.h"
+#include "Synchronously/Receive/BaseReceive.h"
+#include "Synchronously/Send/BaseSend.h"
+#include "Synchronously/Send/Chat.h"
+#include "Synchronously/Send/Bandwidth.h"
+#include "Synchronously/Send/PingPong.h"
+#include "Synchronously/Receive/Chat.h"
+#include "Synchronously/Receive/Bandwidth.h"
+#include "Synchronously/Receive/PingPong.h"
+#include "Deferred/Ctx.h"
+#include "Deferred/QueueCommands.h"
+#include "Deferred/Action.h"
+#include "Deferred/Sender/Text.h"
+#include "Deferred/Sending.h"
+#include "Anchronously/Acme.h"
+#include "Anchronously/Send/Chat.h"
+#include "Anchronously/Receive/Chat.h"
+#include "Anchronously/Ping.h"
 
-namespace syscross::HelloEOS { struct Main {
+namespace syscross::HelloEOS { struct MainAnchronously {
 	void run(int argc) {
 		bool isServer = ( argc > 1 );
 #pragma region prepare
@@ -83,7 +88,9 @@ namespace syscross::HelloEOS { struct Main {
 
 			Synchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
 			std::string message = chat.getMessage( );
-			LOG( "[~] message: '%s'", message.c_str( ) );
+			LOG( "[~] message1: '%s'", message.c_str( ) );
+			message = chat.getMessage( );
+			LOG( "[~] message2: '%s'", message.c_str( ) );
 
 //			Synchronously::Receive::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ) );
 //			if ( !bandwith.recvAndCheck( ) )
@@ -128,102 +135,8 @@ namespace syscross::HelloEOS { struct Main {
 //			if ( !pingPong.sendPingWaitPong( ) )
 //				return;
 
-			Deferred::QueueCommands queueCommands = Deferred::QueueCommands::instance( );
-			Deferred::Ctx ctx{ "CHAT", platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) };
-			{
-				Deferred::Sending sending( ctx, &queueCommands );
-				auto command = sending.text( "PING" );
-				//command.act( );
-			}
-			// TODO(alex): separate
-			EOS_P2P_GetPacketQueueInfoOptions queueVer = { EOS_P2P_GETPACKETQUEUEINFO_API_LATEST };
-			EOS_P2P_PacketQueueInfo queueInfo = { };
-			auto m_P2PHandle = ::EOS_Platform_GetP2PInterface( platformHandle );
-			Deferred::sptr_t command;
-			while ( command = queueCommands.pop( ) ) {
-				// TODO(alex): timeout
-				auto start = std::chrono::system_clock::now( );
-				Deferred::Direction direction = command ->getDirection( );
-				if ( Deferred::Direction::Outgoing == direction ) {
-					::EOS_P2P_GetPacketQueueInfo( m_P2PHandle, &queueVer, &queueInfo );
-					uint64_t outgoingSize = queueInfo.OutgoingPacketQueueCurrentSizeBytes;
-					LOG( "[~] ready drain bytes: %I64d", outgoingSize );
-					while ( outgoingSize ) {
-						::EOS_Platform_Tick( platformHandle );
-						::EOS_P2P_GetPacketQueueInfo( m_P2PHandle, &queueVer, &queueInfo );
-						// can be accidentialy increased underhood EOS
-						if ( outgoingSize != queueInfo.OutgoingPacketQueueCurrentSizeBytes ) {
-							LOG( "[~] left: %I64d", queueInfo.OutgoingPacketQueueCurrentSizeBytes );
-							outgoingSize = queueInfo.OutgoingPacketQueueCurrentSizeBytes;
-						}
-						std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
-					}
-					LOG( "[~] command complete" );
-				}
-			}
-			return;
-
-			Anchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-
-			auto x = chat.message2( timeString );
-
-			struct QueueCommands {
-				void push_back() {
-				}
-			};
-			struct Ctx {
-				const std::string SocketName;
-				const EOS_HPlatform m_PlatformHandle;
-				const EOS_ProductUserId m_LocalUserId;
-				const EOS_ProductUserId m_FriendLocalUserId;
-				QueueCommands m_queueCommands;
-				//void execute_next( ) {}
-				void ticksWhileOutgoing() 
-				{
-					//.isOutgoing;
-					//.isIncoming;
-					LOG( "remain commands: " );
-				}
-				//void ticksWhileIncoming() {}
-			};
-			struct Commander {
-				private:
-				Ctx m_ctx;
-				public:
-				Commander(Ctx &ctx) :
-					m_ctx( ctx )
-					, makeCommand( ctx )
-				{}
-				private:
-				struct MakeCommand {
-					Ctx m_ctx;
-					MakeCommand(Ctx &ctx) :
-						m_ctx( ctx )
-					{}
-					struct Command {
-						bool isOutgoing;
-						bool isIncoming;
-						bool execute() {
-							return { };
-						}
-					} command;
-					Command *sendText(char*) {
-						m_ctx.m_queueCommands.push_back( );
-						return &command;
-					}
-				} makeCommand;
-				public:
-				MakeCommand *operator()() {
-					return &makeCommand;
-				}
-			};
-			Ctx ctxChat{ "CHAT", platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) };
-			Commander commander( ctxChat );
-			auto puCmd = commander( ) ->sendText( "PING" );
-			puCmd ->execute( );
-			ctxChat.ticksWhileOutgoing( );
-			//Anchronously::Send::Chat::makeCommand( );
-
+//			Anchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+//			auto x = chat.message2( timeString );
 //			Networking::send_t future = chat.message( timeString );
 //			bool b = future.get( );
 //			if ( !b )
@@ -253,6 +166,19 @@ namespace syscross::HelloEOS { struct Main {
 //			if ( !future2.get( ) )
 //				return;
 //			LOG( "[~] ping: %lld ms", duration.count( ) );
+
+
+			Deferred::QueueCommands::init( platformHandle );
+			Deferred::Ctx ctx{ "CHAT", platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) };
+			{
+				Deferred::Sending sending( ctx );
+				auto command = sending.text( "PING" );
+				// Second
+				command ->act( );
+			}
+			// +TODO(alex): separate
+			Deferred::QueueCommands::instance( ).ticksAll( );
+			return;
 
 		}
 		LOG( "[~] press any key to exit" );

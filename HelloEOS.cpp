@@ -1,7 +1,9 @@
 ﻿// HelloEOS.cpp - entry point
 // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
 #include "stdafx.h"
-#include "Main.h"
+#include "MainSynchronously.h"
+#include "MainAnchronously.h"
+#include "MainDeferred.h"
 
 int main(int argc, char *argv[]) {
 #ifdef _DEBUG

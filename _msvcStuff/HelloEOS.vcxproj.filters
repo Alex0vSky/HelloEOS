@@ -25,6 +25,9 @@
     <Filter Include="Header Files\Anchronously">
       <UniqueIdentifier>{7592e56d-45df-4570-861b-a3ebe56531ee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Deferred">
+      <UniqueIdentifier>{17a666c9-2957-4547-b1f8-0733648648e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -38,7 +41,7 @@
     <ClInclude Include="stdafx.h">
       <Filter>_pch</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Main.h">
+    <ClInclude Include="..\src\MainDeferred.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Version.h">
@@ -106,6 +109,27 @@
     </ClInclude>
     <ClInclude Include="..\src\Anchronously\Acme.h">
       <Filter>Header Files\Anchronously</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Deferred\Ctx.h">
+      <Filter>Header Files\Deferred</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Deferred\QueueCommands.h">
+      <Filter>Header Files\Deferred</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Deferred\Action.h">
+      <Filter>Header Files\Deferred</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Deferred\Sending.h">
+      <Filter>Header Files\Deferred</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Deferred\Sender\Text.h">
+      <Filter>Header Files\Deferred</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MainAnchronously.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MainSynchronously.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

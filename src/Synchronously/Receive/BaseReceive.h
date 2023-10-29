@@ -43,6 +43,7 @@ protected:
 			result = ::EOS_P2P_ReceivePacket( m_P2PHandle, &m_ReceivePacketOptions
 				, &friendAccountId, &m_SocketId, &channel, messageData.data(), &bytesWritten );
 			if ( EOS_EResult::EOS_Success == result ) {
+				LOG( "[BaseReceive] bytesWritten: %d.", bytesWritten );
 				messageData.resize( bytesWritten );
 				break;
 			}
