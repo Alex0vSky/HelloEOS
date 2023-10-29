@@ -128,10 +128,10 @@ namespace syscross::HelloEOS { struct Main {
 //			if ( !pingPong.sendPingWaitPong( ) )
 //				return;
 
-			Async::QueueCommands queueCommands;
-			Async::Ctx ctx{ "CHAT", platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) };
+			Deferred::QueueCommands queueCommands = Deferred::QueueCommands::instance( );
+			Deferred::Ctx ctx{ "CHAT", platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) };
 			{
-				Async::Sending sending( ctx, &queueCommands );
+				Deferred::Sending sending( ctx, &queueCommands );
 				auto command = sending.text( "PING" );
 				//command.act( );
 			}
@@ -139,12 +139,12 @@ namespace syscross::HelloEOS { struct Main {
 			EOS_P2P_GetPacketQueueInfoOptions queueVer = { EOS_P2P_GETPACKETQUEUEINFO_API_LATEST };
 			EOS_P2P_PacketQueueInfo queueInfo = { };
 			auto m_P2PHandle = ::EOS_Platform_GetP2PInterface( platformHandle );
-			Async::sptr_t command;
+			Deferred::sptr_t command;
 			while ( command = queueCommands.pop( ) ) {
 				// TODO(alex): timeout
 				auto start = std::chrono::system_clock::now( );
-				Async::Direction direction = command ->getDirection( );
-				if ( Async::Direction::Outgoing == direction ) {
+				Deferred::Direction direction = command ->getDirection( );
+				if ( Deferred::Direction::Outgoing == direction ) {
 					::EOS_P2P_GetPacketQueueInfo( m_P2PHandle, &queueVer, &queueInfo );
 					uint64_t outgoingSize = queueInfo.OutgoingPacketQueueCurrentSizeBytes;
 					LOG( "[~] ready drain bytes: %I64d", outgoingSize );

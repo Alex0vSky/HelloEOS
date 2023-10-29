@@ -47,13 +47,14 @@ namespace fx {
 }
 #pragma endregion // easy_bind
 
-namespace syscross::HelloEOS::Async {
+namespace syscross::HelloEOS::Deferred {
 
 enum class Direction { Outgoing, Incoming };
 
+class QueueCommands;
 namespace detail_ {
 struct ICommand {
-	virtual void act() const  = 0;
+	virtual void act(QueueCommands *) = 0;
 	virtual Direction getDirection() const = 0;
 };
 } // namespace detail_
@@ -61,7 +62,18 @@ typedef std::shared_ptr< detail_::ICommand > sptr_t;
 
 class QueueCommands {
 	std::queue< sptr_t > m_fifo;
+	QueueCommands() = default;
+	QueueCommands(const QueueCommands &) = delete;
+	QueueCommands(QueueCommands &&) = delete;
+	QueueCommands& operator=(const QueueCommands &) = delete;
+	QueueCommands& operator=(QueueCommands &&) = delete;
+
 public:
+	static QueueCommands& instance() {
+		std::cout << "instance()" << std::endl;
+		static QueueCommands inst;
+		return inst;
+	}
 	void push(const sptr_t &p) {
 		m_fifo.push( p );
 	}
@@ -95,8 +107,9 @@ public:
 		, m_function( std::forward<FwdF>( func ) )
 		, m_args{ std::forward<FwdTs>( args )... }
 	{}
-	void act() const {
+	void act(QueueCommands *queueCommands) {
 		std::apply( m_function, m_args );
+		queueCommands ->push( sptr_t( this ) );
 	}
 	Direction getDirection() const {
 		return m_direction;
@@ -106,10 +119,9 @@ public:
 namespace detail_ {
 template <typename F, typename... Args>
 auto make_action(Direction direction, F&& f, Args&&... args) {
-    return std::make_shared< 
-				Action< std::decay_t< F >, std::remove_cv_t< std::remove_reference_t< Args > >...>
-			>
-			(direction, std::forward< F >( f ), std::forward< Args >( args )...)
+    return std::make_shared
+			< Action< std::decay_t< F >, std::remove_cv_t< std::remove_reference_t< Args > >...> >
+			( direction, std::forward< F >( f ), std::forward< Args >( args )... )
 		;
 }
 
@@ -126,7 +138,7 @@ class Sending {
 	Ctx m_ctx;
 	QueueCommands *m_queueCommands;
 public:
-	Sending(Ctx ctx, Async::QueueCommands *queueCommands) : 
+	Sending(Ctx ctx, Deferred::QueueCommands *queueCommands) : 
 		m_ctx( ctx )
 		, m_queueCommands( queueCommands )
 	{}
@@ -143,7 +155,7 @@ public:
 				}
 				, p 
 			);
-		command ->act( );
+		command ->act( m_queueCommands );
 		m_queueCommands ->push( command );
 		return command;
 	}
