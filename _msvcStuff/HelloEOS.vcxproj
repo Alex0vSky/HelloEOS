@@ -178,6 +178,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\resource\resource.h" />
+    <ClInclude Include="..\src\Anchronously\Acme.h" />
     <ClInclude Include="..\src\Anchronously\Ping.h" />
     <ClInclude Include="..\src\Anchronously\Receive\Chat.h" />
     <ClInclude Include="..\src\Anchronously\Send\Chat.h" />

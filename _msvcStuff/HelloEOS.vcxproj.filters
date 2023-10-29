@@ -104,6 +104,9 @@
     <ClInclude Include="..\src\Anchronously\Send\Chat.h">
       <Filter>Header Files\Anchronously</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Anchronously\Acme.h">
+      <Filter>Header Files\Anchronously</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resource\HelloEOS.rc">

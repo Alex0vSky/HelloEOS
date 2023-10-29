@@ -9,8 +9,10 @@ protected:
 	const EOS_HP2P m_P2PHandle;
 	EOS_P2P_SocketId m_SocketId;
 	EOS_P2P_SendPacketOptions m_Options;
+	// TODO(alex): useless
 	std::atomic_bool m_bStop = false;
 
+	// TODO(alex): sync only, move to separate or remove
 	void ticks_(bool doTick = true) const {
 		do {
 			if ( doTick ) ::EOS_Platform_Tick( m_PlatformHandle );

@@ -35,6 +35,7 @@
 #include "Synchronously\Receive\Chat.h"
 #include "Synchronously\Receive\Bandwidth.h"
 #include "Synchronously\Receive\PingPong.h"
+#include "Anchronously\Acme.h"
 #include "Anchronously\Send\Chat.h"
 #include "Anchronously\Receive\Chat.h"
 #include "Anchronously\Ping.h"
@@ -127,26 +128,111 @@ namespace syscross::HelloEOS { struct Main {
 //			if ( !pingPong.sendPingWaitPong( ) )
 //				return;
 
-			//std::vector< int > vec;
-			std::deque< int > fifo;
-			fifo.push_back( 1 );
-			fifo.push_back( 2 );
-			int n = fifo.front( );
-			fifo.pop_front( );
+			Async::QueueCommands queueCommands;
+			Async::Ctx ctx{ "CHAT", platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) };
+			{
+				Async::Sending sending( ctx, &queueCommands );
+				auto command = sending.text( "PING" );
+				//command.act( );
+			}
+			// TODO(alex): separate
+			EOS_P2P_GetPacketQueueInfoOptions queueVer = { EOS_P2P_GETPACKETQUEUEINFO_API_LATEST };
+			EOS_P2P_PacketQueueInfo queueInfo = { };
+			auto m_P2PHandle = ::EOS_Platform_GetP2PInterface( platformHandle );
+			Async::sptr_t command;
+			while ( command = queueCommands.pop( ) ) {
+				// TODO(alex): timeout
+				auto start = std::chrono::system_clock::now( );
+				Async::Direction direction = command ->getDirection( );
+				if ( Async::Direction::Outgoing == direction ) {
+					::EOS_P2P_GetPacketQueueInfo( m_P2PHandle, &queueVer, &queueInfo );
+					uint64_t outgoingSize = queueInfo.OutgoingPacketQueueCurrentSizeBytes;
+					LOG( "[~] ready drain bytes: %I64d", outgoingSize );
+					while ( outgoingSize ) {
+						::EOS_Platform_Tick( platformHandle );
+						::EOS_P2P_GetPacketQueueInfo( m_P2PHandle, &queueVer, &queueInfo );
+						// can be accidentialy increased underhood EOS
+						if ( outgoingSize != queueInfo.OutgoingPacketQueueCurrentSizeBytes ) {
+							LOG( "[~] left: %I64d", queueInfo.OutgoingPacketQueueCurrentSizeBytes );
+							outgoingSize = queueInfo.OutgoingPacketQueueCurrentSizeBytes;
+						}
+						std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
+					}
+					LOG( "[~] command complete" );
+				}
+			}
+			return;
 
 			Anchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
 
 			auto x = chat.message2( timeString );
 
-			Networking::send_t future = chat.message( timeString );
-			bool b = future.get( );
-			if ( !b )
-				return;
-			LOG( "[~] press [Ctrl+C] to exit" );
-			do { 
-				::EOS_Platform_Tick( platformHandle );
-				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
-			} while( true );
+			struct QueueCommands {
+				void push_back() {
+				}
+			};
+			struct Ctx {
+				const std::string SocketName;
+				const EOS_HPlatform m_PlatformHandle;
+				const EOS_ProductUserId m_LocalUserId;
+				const EOS_ProductUserId m_FriendLocalUserId;
+				QueueCommands m_queueCommands;
+				//void execute_next( ) {}
+				void ticksWhileOutgoing() 
+				{
+					//.isOutgoing;
+					//.isIncoming;
+					LOG( "remain commands: " );
+				}
+				//void ticksWhileIncoming() {}
+			};
+			struct Commander {
+				private:
+				Ctx m_ctx;
+				public:
+				Commander(Ctx &ctx) :
+					m_ctx( ctx )
+					, makeCommand( ctx )
+				{}
+				private:
+				struct MakeCommand {
+					Ctx m_ctx;
+					MakeCommand(Ctx &ctx) :
+						m_ctx( ctx )
+					{}
+					struct Command {
+						bool isOutgoing;
+						bool isIncoming;
+						bool execute() {
+							return { };
+						}
+					} command;
+					Command *sendText(char*) {
+						m_ctx.m_queueCommands.push_back( );
+						return &command;
+					}
+				} makeCommand;
+				public:
+				MakeCommand *operator()() {
+					return &makeCommand;
+				}
+			};
+			Ctx ctxChat{ "CHAT", platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) };
+			Commander commander( ctxChat );
+			auto puCmd = commander( ) ->sendText( "PING" );
+			puCmd ->execute( );
+			ctxChat.ticksWhileOutgoing( );
+			//Anchronously::Send::Chat::makeCommand( );
+
+//			Networking::send_t future = chat.message( timeString );
+//			bool b = future.get( );
+//			if ( !b )
+//				return;
+//			LOG( "[~] press [Ctrl+C] to exit" );
+//			do { 
+//				::EOS_Platform_Tick( platformHandle );
+//				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
+//			} while( true );
 
 //			Anchronously::Ping ping( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
 //			std::chrono::milliseconds duration;
