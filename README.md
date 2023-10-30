@@ -8,7 +8,7 @@ Checking the Epic Online Services (EOS) p2p relays in different ways in C++
 - [x] 'deferred' approach instead of async
 - [x] multi-channeling
 - [x] PING-PONG
-- [ ] measure ping in milli
-- [ ] more responsible throughput measurement
+- [x] measure ping in milli
+- [ ] more responsible bandwidth measurement
 - [ ] gRPC
 - [ ] UnrealEngine UObject-s Serialize/Deserialize, replication
