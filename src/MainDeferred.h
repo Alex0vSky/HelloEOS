@@ -27,23 +27,16 @@
 #include "Synchronously/Friend.h"
 #include "Synchronously/AccountMapping.h"
 #include "Synchronously/Presence.h"
-#include "Synchronously/Receive/BaseReceive.h"
+// TODO(alex): removeme
 #include "Synchronously/Send/BaseSend.h"
-#include "Synchronously/Send/Chat.h"
-#include "Synchronously/Send/Bandwidth.h"
-#include "Synchronously/Send/PingPong.h"
-#include "Synchronously/Receive/Chat.h"
-#include "Synchronously/Receive/Bandwidth.h"
-#include "Synchronously/Receive/PingPong.h"
 #include "Deferred/Ctx.h"
+#include "Deferred/ConnectionRequestListener/AcceptEveryone.h"
 #include "Deferred/QueueCommands.h"
 #include "Deferred/Action.h"
 #include "Deferred/Sender/Text.h"
+#include "Deferred/Receiver/Text.h"
 #include "Deferred/Sending.h"
-#include "Anchronously/Acme.h"
-#include "Anchronously/Send/Chat.h"
-#include "Anchronously/Receive/Chat.h"
-#include "Anchronously/Ping.h"
+#include "Deferred/Receiving.h"
 
 namespace syscross::HelloEOS { struct MainDeferred {
 	void run(int argc) {
@@ -83,104 +76,26 @@ namespace syscross::HelloEOS { struct MainDeferred {
 		std::strftime( timeString, sizeof( timeString ), "%A %c", std::localtime( &t ) );
 #pragma endregion // prepare
 
+		Deferred::QueueCommands::init( platformHandle );
+		Deferred::Ctx ctx{ "CHAT", platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) };
+		Deferred::ConnectionRequestListener::AcceptEveryone acceptEveryone( ctx );
 		if ( isServer ) {
 			LOG( "[~] server" );
-
-			Synchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
-			std::string message = chat.getMessage( );
-			LOG( "[~] message1: '%s'", message.c_str( ) );
-			message = chat.getMessage( );
-			LOG( "[~] message2: '%s'", message.c_str( ) );
-
-//			Synchronously::Receive::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ) );
-//			if ( !bandwith.recvAndCheck( ) )
-//				return;
-
-//			Synchronously::Receive::PingPong pingPong( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-//			if ( !pingPong.recvPingAndAnswerPong( ) )
-//				return;
-
-//			Anchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
-//			Networking::recv_t future = chat.getMessage( );
-//			do { 
-//				::EOS_Platform_Tick( platformHandle );
-//				std::future_status fStat = future.wait_for( std::chrono::milliseconds( 1 ) );
-//				if ( std::future_status::timeout != fStat )
-//					break;
-//				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
-//			} while( true );
-//			auto messageData = future.get( );
-//			if ( messageData.empty( ) )
-//				return;
-//			std::string message( messageData.begin( ), messageData.end( ) );
-//			LOG( "[~] message: '%s'", message.c_str( ) );
-
-//			using namespace std::chrono_literals;
-//			co_await 10s;
+			Deferred::Receiving receiving( ctx, acceptEveryone );
+			auto len = strlen( "PING" );
+			auto command = receiving.text( len );
+			//command ->act( ); // OR
+			receiving.text( len ); // OR
 
 		} else {
 			LOG( "[~] client" );
-
-//			Synchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-//			std::string message = timeString;
-//			if ( !chat.message( message ) )
-//				return;
-
-//			Synchronously::Send::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-//			size_t Bandwith;
-//			if ( !bandwith.measure( &Bandwith ) )
-//				return;
-
-//			Synchronously::Send::PingPong pingPong( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-//			if ( !pingPong.sendPingWaitPong( ) )
-//				return;
-
-//			Anchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-//			auto x = chat.message2( timeString );
-//			Networking::send_t future = chat.message( timeString );
-//			bool b = future.get( );
-//			if ( !b )
-//				return;
-//			LOG( "[~] press [Ctrl+C] to exit" );
-//			do { 
-//				::EOS_Platform_Tick( platformHandle );
-//				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
-//			} while( true );
-
-//			Anchronously::Ping ping( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-//			std::chrono::milliseconds duration;
-//			Networking::ping_t future1 = ping.measure( &duration );
-//			Networking::ping_t future2;
-//			Networking::ping_t *pfuture = &future1;
-//			do { 
-//				::EOS_Platform_Tick( platformHandle );
-//				std::future_status fStat = pfuture ->wait_for( std::chrono::milliseconds( 1 ) );
-//				if ( std::future_status::timeout != fStat ) {
-//					if ( pfuture == &future2 ) 
-//						break;
-//					// Second after warmup 
-//					future2 = ping.measure( &duration );
-//				}
-//				std::this_thread::sleep_for( std::chrono::milliseconds{ 100 } );
-//			} while( true );
-//			if ( !future2.get( ) )
-//				return;
-//			LOG( "[~] ping: %lld ms", duration.count( ) );
-
-
-			Deferred::QueueCommands::init( platformHandle );
-			Deferred::Ctx ctx{ "CHAT", platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) };
-			{
-				Deferred::Sending sending( ctx );
-				auto command = sending.text( "PING" );
-				// Second
-				command ->act( );
-			}
-			// +TODO(alex): separate
-			Deferred::QueueCommands::instance( ).ticksAll( );
-			return;
-
+			
+			Deferred::Sending sending( ctx );
+			auto command = sending.text( "PING" );
+			// Second
+			command ->act( );
 		}
+		auto vector = Deferred::QueueCommands::instance( ).ticksAll( );
 		LOG( "[~] press any key to exit" );
 		getchar( );
 		return;

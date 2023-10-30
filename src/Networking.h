@@ -3,6 +3,7 @@
 namespace syscross::HelloEOS {
 struct Networking {
 	typedef std::vector< unsigned char > messageData_t;
+	typedef std::optional< messageData_t > optionalMessageData_t;
 	typedef std::future< bool > send_t;
 	typedef std::future< messageData_t > recv_t;
 	typedef std::future< bool > ping_t;

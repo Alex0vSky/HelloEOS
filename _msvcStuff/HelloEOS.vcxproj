@@ -185,8 +185,10 @@
     <ClInclude Include="..\src\Anchronously\Send\Chat.h" />
     <ClInclude Include="..\src\Credentials\Hardcode.h" />
     <ClInclude Include="..\src\Deferred\Action.h" />
+    <ClInclude Include="..\src\Deferred\ConnectionRequestListener\AcceptEveryone.h" />
     <ClInclude Include="..\src\Deferred\Ctx.h" />
     <ClInclude Include="..\src\Deferred\QueueCommands.h" />
+    <ClInclude Include="..\src\Deferred\Receiver\Text.h" />
     <ClInclude Include="..\src\Deferred\Sender\Text.h" />
     <ClInclude Include="..\src\Deferred\Sending.h" />
     <ClInclude Include="..\src\HumanReadable.h" />
@@ -195,6 +197,7 @@
     <ClInclude Include="..\src\MainAnchronously.h" />
     <ClInclude Include="..\src\MainDeferred.h" />
     <ClInclude Include="..\src\MainSynchronously.h" />
+    <ClInclude Include="..\src\Networking.h" />
     <ClInclude Include="..\src\Synchronously\AccountMapping.h" />
     <ClInclude Include="..\src\Synchronously\Auth.h" />
     <ClInclude Include="..\src\Synchronously\Friend.h" />

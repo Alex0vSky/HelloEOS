@@ -6,8 +6,10 @@ class Chat : public BaseReceive {
 
 public:
 	std::string getMessage() {
-		Networking::messageData_t messageData = receive_( );
-		return std::string( messageData.begin( ), messageData.end( ) );
+		Networking::optionalMessageData_t messageData = receive_( );
+		if ( !messageData )
+			return { };
+		return std::string( messageData.value( ).begin( ), messageData.value( ).end( ) );
 	}
 };
 } // namespace syscross::HelloEOS::Synchronously::Receive

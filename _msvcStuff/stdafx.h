@@ -15,6 +15,7 @@
 #include <sstream>
 #include <iomanip>
 #include <queue>
+#include <optional>
 
 // EOS
 #include "eos_auth.h"

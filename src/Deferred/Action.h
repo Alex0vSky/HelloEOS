@@ -6,25 +6,33 @@ namespace detail_ {
 template <typename F, typename... Ts>
 class Action : 
 	public QueueCommands::ICommand 
-	, public std::enable_shared_from_this< Action< F, Ts ...> >
+	, public std::enable_shared_from_this< Action< F, Ts... > >
 {
-	static_assert( !(std::is_rvalue_reference_v<Ts> && ...) );
+	static_assert( !( std::is_rvalue_reference_v<Ts> &&... ) );
 	const QueueCommands::Direction m_direction;
 	const F m_function;
 	const std::tuple<Ts...> m_args;
+
 public:
 	template <typename FwdF, typename... FwdTs,
-		typename = std::enable_if_t< (std::is_convertible_v< FwdTs&&, Ts > && ...) >>
+		typename = std::enable_if_t< ( std::is_convertible_v< FwdTs&&, Ts > &&... ) >>
 	Action(QueueCommands::Direction direction, FwdF&& func, FwdTs&&... args) : 
 		m_direction( direction )
 		, m_function( std::forward<FwdF>( func ) )
 		, m_args{ std::forward<FwdTs>( args )... }
 	{}
-	void act() {
-		std::apply( m_function, m_args );
-		Deferred::QueueCommands::instance( ).push( shared_from_this( ) );
+	virtual ~Action()
+	{}
+
+	Networking::messageData_t act(
+		const QueueCommands::AvoidPush& avoidPush = QueueCommands::AvoidPush{ } 
+	) override {
+		Networking::messageData_t messageData = std::apply( m_function, m_args );
+		if ( !avoidPush.Yes )
+			Deferred::QueueCommands::instance( ).push( shared_from_this( ) );
+		return messageData;
 	}
-	QueueCommands::Direction getDirection() const {
+	QueueCommands::Direction getDirection() const override {
 		return m_direction;
 	}
 };

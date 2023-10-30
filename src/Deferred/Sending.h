@@ -13,11 +13,13 @@ public:
 			m_ctx.m_PlatformHandle
 			, m_ctx.m_LocalUserId
 			, m_ctx.m_FriendLocalUserId
+			, m_ctx.m_SocketName
 		);
 		auto command = detail_::make_action(
 				QueueCommands::Direction::Outgoing
 				, [text] (const std::shared_ptr< Sender::Text > &p) { 
 					p ->sendTextPacket_( text );
+					return Networking::messageData_t{ };
 				}
 				, executor 
 			);

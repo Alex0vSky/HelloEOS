@@ -131,6 +131,15 @@
     <ClInclude Include="..\src\MainSynchronously.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Deferred\ConnectionRequestListener\AcceptEveryone.h">
+      <Filter>Header Files\Deferred</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Deferred\Receiver\Text.h">
+      <Filter>Header Files\Deferred</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Networking.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resource\HelloEOS.rc">
