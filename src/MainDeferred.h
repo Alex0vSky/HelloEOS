@@ -41,6 +41,13 @@
 namespace syscross::HelloEOS { struct MainDeferred {
 	void run(int argc) {
 		bool isServer = ( argc > 1 );
+
+		size_t j = 0;
+		LOG( "%zd", j++ );
+		LOG( "%zd", j++ );
+		LOG( L"%zd", j++ );
+		LOG( L"%zd", j++ );
+
 #pragma region prepare
 		InitializeEOS init;
 		EOS_HPlatform platformHandle = init.initialize( );
@@ -95,7 +102,13 @@ namespace syscross::HelloEOS { struct MainDeferred {
 			// Second
 			command ->act( );
 		}
-		auto vector = Deferred::QueueCommands::instance( ).ticksAll( );
+		auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
+		//for ( size_t i = 0; i < incomingData.size( ); ++i ) {
+		size_t i = 0;
+		for ( const auto &packet : incomingData ) {
+			std::string string( packet.begin( ), packet.end( ) );
+			LOG( "[~] text #%zd: '%s'", i++, string.c_str( ) );
+		}
 		LOG( "[~] press any key to exit" );
 		getchar( );
 		return;

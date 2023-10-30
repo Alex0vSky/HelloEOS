@@ -130,29 +130,19 @@ public:
 			// +-TODO(alex): timeout and return bool
 			bool isContinuation = true;
 			auto timeout = now( ) + c_commandTO;
-			if ( Direction::Incoming == command ->getDirection( ) ) 
-			{
-				//LOG( "[ticksAll] %s, process bytes: %I64d", direction.c_str( ), m_IncomingSize );
-				uint64_t lastIncomingSize = m_IncomingSize;
+			if ( Direction::Incoming == command ->getDirection( ) ) {
+				getQueueInfo( );
+				LOG( "[ticksAll] %s, process bytes: %I64d", direction.c_str( ), m_IncomingSize );
+				Networking::messageData_t packet = { };
 				do {
-					Networking::messageData_t data = command ->act( m_avoidPush );
-					allIncomingData.push_back( data );
-					// tmp
-					if ( data.size( ) ) {
-						LOG( "[ticksAll] %s, data", direction.c_str( ) );
-						std::string string( data.begin( ), data.end( ) );
-						LOG( "[ticksAll] %s, text: '%s'", direction.c_str( ), string.c_str( ) );
+					packet = command ->act( m_avoidPush );
+					if ( packet.size( ) )
 						break;
-					}
 					tick( );
 					getQueueInfo( );
-					if ( lastIncomingSize != m_IncomingSize ) {
-						if ( m_IncomingSize )
-							LOG( "[ticksAll] %s, left: %I64d", direction.c_str( ), m_IncomingSize );
-						lastIncomingSize = m_IncomingSize;
-					}
 					std::this_thread::sleep_for( c_sleep );
 				} while ( isContinuation = now( ) < timeout );
+				allIncomingData.push_back( packet );
 			}
 			if ( isContinuation )
 				LOG( "[ticksAll] %s, complete command #%d", direction.c_str( ), count );
