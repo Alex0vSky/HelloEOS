@@ -80,6 +80,7 @@ namespace syscross::HelloEOS { struct MainDeferred {
 		Deferred::ConnectionRequestListener::AcceptEveryone acceptEveryone( ctx );
 		uint8_t channelReceiving = 1;
 		uint8_t channelSending = 2;
+		std::chrono::milliseconds sleep{ 100 };
 		if ( isServer ) {
 			LOG( "[~] server" );
 //			Deferred::Receiving receiving( ctx, acceptEveryone );
@@ -97,12 +98,13 @@ namespace syscross::HelloEOS { struct MainDeferred {
 				const auto &packet = incomingData[ 0 ];
 				std::string string( packet.begin( ), packet.end( ) );
 				LOG( "[>>] '%s'", string.c_str( ) );
-//				if ( !string.compare( "PING" ) ) 
+				if ( string.compare( "PING" ) ) 
+					throw std::runtime_error( "ping-pong mismatch" );
 				LOG( "[<<] 'PONG'" );
 				sending.text( "PONG" );
 				Deferred::QueueCommands::instance( ).ticksAll( );
 				LOG( "[~] sleep" );
-				std::this_thread::sleep_for( std::chrono::seconds{ 1 } );
+				std::this_thread::sleep_for( sleep );
 			}
 
 		} else {
@@ -126,10 +128,11 @@ namespace syscross::HelloEOS { struct MainDeferred {
 				const auto &packet = incomingData[ 0 ];
 				std::string string( packet.begin( ), packet.end( ) );
 				LOG( "[>>] '%s'", string.c_str( ) );
+				if ( string.compare( "PONG" ) ) 
+					throw std::runtime_error( "ping-pong mismatch" );
 				LOG( "[~] sleep" );
-				std::this_thread::sleep_for( std::chrono::seconds{ 1 } );
+				std::this_thread::sleep_for( sleep );
 			}
-
 		}
 		LOG( "[~] press any key to exit" );
 		getchar( );

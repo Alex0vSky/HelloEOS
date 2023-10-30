@@ -8,14 +8,14 @@ class SendText {
 	EOS_P2P_SendPacketOptions m_options;
 
 	template<typename T>
-	bool sendPacket_(const T &value) {
+	void sendPacket_(const T &value) {
 		Networking::messageData_t messageData( value.begin( ), value.end( ) );
 		auto dataLengthBytes = messageData.size( ) * sizeof( Networking::messageData_t::value_type );
-		m_options.DataLengthBytes = static_cast<uint32_t>( dataLengthBytes );
+		m_options.DataLengthBytes = static_cast< uint32_t >( dataLengthBytes );
 		m_options.Data = messageData.data( );
 		EOS_EResult result = ::EOS_P2P_SendPacket( m_p2PHandle, &m_options );
-		LOG( "[SendText] result: '%s'", ::EOS_EResult_ToString( result ) );
-		return EOS_EResult::EOS_Success == result;
+		if ( EOS_EResult::EOS_Success != result )
+			throw std::runtime_error( "error EOS_P2P_SendPacket" );
 	}
 
 public:
@@ -34,8 +34,8 @@ public:
 		m_options.Reliability = EOS_EPacketReliability::EOS_PR_ReliableOrdered;
 		m_options.bDisableAutoAcceptConnection = EOS_FALSE;
 	}
-	bool sendTextPacket_(const std::string &value) {
-		return sendPacket_( value );
+	void sendTextPacket_(const std::string &value) {
+		sendPacket_( value );
 	}
 };
 } // namespace syscross::HelloEOS::Deferred::Sender

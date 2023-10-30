@@ -55,7 +55,7 @@ public:
 		// tmp
 		if ( m_channel != channel ) 
 			throw std::runtime_error( "channel mismatch" );
-		LOG( "[RecvText] bytesWritten: %d", bytesWritten );
+		//LOG( "[RecvText] bytesWritten: %d", bytesWritten );
 		messageData.resize( bytesWritten );
 		return messageData;
 	}

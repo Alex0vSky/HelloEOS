@@ -3,12 +3,12 @@
 namespace syscross::HelloEOS::Deferred {
 namespace detail_ { template <typename F, typename... Ts> class Action; } // namespace detail_
 class QueueCommands {
+	static constexpr std::chrono::seconds c_commandTO{ 30 };
+	static constexpr std::chrono::milliseconds c_sleep{ 15 };
+	static constexpr auto now = std::chrono::system_clock::now;
 	EOS_HPlatform m_platformHandle;
 	EOS_HP2P m_p2PHandle;
 	EOS_P2P_GetPacketQueueInfoOptions m_queueVer = { EOS_P2P_GETPACKETQUEUEINFO_API_LATEST };
-	static constexpr std::chrono::seconds c_commandTO{ 30 };
-	static constexpr std::chrono::milliseconds c_sleep{ 500 };
-
 	// Shortcat
 	uint64_t m_IncomingSize = 0;
 	uint64_t m_OutgoingSize = 0;
@@ -42,7 +42,6 @@ private:
 		static QueueCommands instance{ platformHandle };
 		return instance;
 	}
-
 	sptr_t pop() {
 		if ( m_fifo.empty( ) )
 			return nullptr;
@@ -50,19 +49,15 @@ private:
 		m_fifo.pop( );
 		return x;
 	}
-
-	template <typename, typename...>
-	friend class detail_::Action;
+	template <typename, typename...> friend class detail_::Action;
 	friend class Receiving;
 	friend class Sending;
 	void push(const sptr_t &p) {
 		m_fifo.push( p );
 	}
-
 	void tick() {
 		::EOS_Platform_Tick( m_platformHandle );
 	}
-
 	void getQueueInfo() {
 		EOS_P2P_PacketQueueInfo queueInfo = { };
 		auto r = ::EOS_P2P_GetPacketQueueInfo( m_p2PHandle, &m_queueVer, &queueInfo );
@@ -71,26 +66,12 @@ private:
 		m_IncomingSize = queueInfo.IncomingPacketQueueCurrentSizeBytes;
 		m_OutgoingSize = queueInfo.OutgoingPacketQueueCurrentSizeBytes;
 	}
-
 	std::string directionToString(const sptr_t &command) {
 		if ( Direction::Outgoing == command ->getDirection( ) ) 
 			return "Outgoing";
 		if ( Direction::Incoming == command ->getDirection( ) ) 
 			return "Incoming";
 		return { };
-	}
-
-	static constexpr auto now = std::chrono::system_clock::now;
-
-	// @insp https://stackoverflow.com/questions/28410697/c-convert-vector-to-tuple
-	template <typename T, std::size_t... Indices>
-	auto vectorToTupleHelper(const std::vector<T>& v, std::index_sequence<Indices...>) {
-		return std::make_tuple(v[Indices]...);
-	}
-	template <std::size_t N, typename T>
-	auto vectorToTuple(const std::vector<T>& v) {
-		//assert(v.size() >= N);
-		return vectorToTupleHelper(v, std::make_index_sequence<N>());
 	}
 
 public:
@@ -131,7 +112,7 @@ public:
 			if ( Direction::Incoming == command ->getDirection( ) ) {
 				tick( );
 				getQueueInfo( );
-				LOG( "[ticksAll] %s, process bytes: %I64d", direction.c_str( ), m_IncomingSize );
+				//LOG( "[ticksAll] %s, process bytes: %I64d", direction.c_str( ), m_IncomingSize );
 				Networking::messageData_t packet = { };
 				do {
 					packet = command ->act( m_avoidPush );
