@@ -3,8 +3,8 @@
 namespace syscross::HelloEOS::Deferred {
 struct Ctx {
 	const std::string m_SocketName;
-	const EOS_HPlatform m_PlatformHandle;
 	const EOS_ProductUserId m_LocalUserId;
+	const EOS_HPlatform m_PlatformHandle;
 	const EOS_ProductUserId m_FriendLocalUserId;
 };
 } // namespace syscross::HelloEOS::Deferred

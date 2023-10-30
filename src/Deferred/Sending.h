@@ -20,7 +20,6 @@ public:
 				}
 				, executor 
 			);
-		//command ->act( );
 		Deferred::QueueCommands::instance( ).push( command );
 		return command;
 	}

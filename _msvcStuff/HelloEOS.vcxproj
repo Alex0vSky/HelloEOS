@@ -187,6 +187,7 @@
     <ClInclude Include="..\src\Deferred\Action.h" />
     <ClInclude Include="..\src\Deferred\ConnectionRequestListener\AcceptEveryone.h" />
     <ClInclude Include="..\src\Deferred\Ctx.h" />
+    <ClInclude Include="..\src\Deferred\PingPonger.h" />
     <ClInclude Include="..\src\Deferred\QueueCommands.h" />
     <ClInclude Include="..\src\Deferred\Receiver\RecvText.h" />
     <ClInclude Include="..\src\Deferred\Sender\SendText.h" />

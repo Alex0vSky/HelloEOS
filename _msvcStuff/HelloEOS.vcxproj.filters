@@ -140,6 +140,9 @@
     <ClInclude Include="..\src\Networking.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Deferred\PingPonger.h">
+      <Filter>Header Files\Deferred</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resource\HelloEOS.rc">

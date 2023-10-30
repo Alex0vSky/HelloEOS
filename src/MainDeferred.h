@@ -35,6 +35,7 @@
 #include "Deferred/Receiver/RecvText.h"
 #include "Deferred/Sending.h"
 #include "Deferred/Receiving.h"
+#include "Deferred/PingPonger.h"
 
 namespace syscross::HelloEOS { struct MainDeferred {
 	void run(int argc) {
@@ -76,61 +77,69 @@ namespace syscross::HelloEOS { struct MainDeferred {
 #pragma endregion // prepare
 
 		Deferred::QueueCommands::init( platformHandle );
-		Deferred::Ctx ctx{ "CHAT", platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) };
+		Deferred::Ctx ctx{ "CHAT", auth.getLocalUserId( ), platformHandle, mapping.getFriendLocalUserId( ) };
 		Deferred::ConnectionRequestListener::AcceptEveryone acceptEveryone( ctx );
 		uint8_t channelReceiving = 1;
 		uint8_t channelSending = 2;
 		std::chrono::milliseconds sleep{ 100 };
 		if ( isServer ) {
 			LOG( "[~] server" );
-//			Deferred::Receiving receiving( ctx, acceptEveryone );
-//			auto len = strlen( "PING" );
-//			auto command = receiving.text( len );
-//			////command ->act( ); // OR
-//			//receiving.text( len ); // OR
+////			Deferred::Receiving receiving( ctx, acceptEveryone );
+////			auto len = strlen( "PING" );
+////			auto command = receiving.text( len );
+////			////command ->act( ); // OR
+////			//receiving.text( len ); // OR
+//
+//			Deferred::Receiving receiving( ctx, channelReceiving, acceptEveryone );
+//			Deferred::Sending sending( ctx, channelSending );
+//			while ( true ) {
+//				receiving.text( strlen( "PING" ) );
+//				auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
+//				const auto &packet = incomingData[ 0 ];
+//				std::string string( packet.begin( ), packet.end( ) );
+//				LOG( "[>>] '%s'", string.c_str( ) );
+//				if ( string.compare( "PING" ) ) 
+//					throw std::runtime_error( "ping-pong mismatch" );
+//				LOG( "[<<] 'PONG'" );
+//				sending.text( "PONG" );
+//				Deferred::QueueCommands::instance( ).ticksAll( );
+//				LOG( "[~] sleep" );
+//				std::this_thread::sleep_for( sleep );
+//			}
 
-			Deferred::Receiving receiving( ctx, channelReceiving, acceptEveryone );
-			Deferred::Sending sending( ctx, channelSending );
-			while ( true ) {
-				LOG( "[>>] ..." );
-				receiving.text( strlen( "PING" ) );
-				auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
-				const auto &packet = incomingData[ 0 ];
-				std::string string( packet.begin( ), packet.end( ) );
-				LOG( "[>>] '%s'", string.c_str( ) );
-				if ( string.compare( "PING" ) ) 
-					throw std::runtime_error( "ping-pong mismatch" );
-				LOG( "[<<] 'PONG'" );
-				sending.text( "PONG" );
-				Deferred::QueueCommands::instance( ).ticksAll( );
-				LOG( "[~] sleep" );
-				std::this_thread::sleep_for( sleep );
-			}
+			Deferred::PingPonger pingPonger( ctx );
+			pingPonger.infinitePonger( );
 
 		} else {
 			LOG( "[~] client" );
-//			Deferred::Sending sending( ctx );
-//			auto command = sending.text( "PING" );
-//			//// Second
-//			//command ->act( );
+////			Deferred::Sending sending( ctx );
+////			auto command = sending.text( "PING" );
+////			//// Second
+////			//command ->act( );
+//
+//			std::swap( channelSending, channelReceiving );
+//			Deferred::Sending sending( ctx, channelSending );
+//			Deferred::Receiving receiving( ctx, channelReceiving, acceptEveryone );
+//			while ( true ) {
+//				LOG( "[<<] 'PING'" );
+//				sending.text( "PING" );
+//				receiving.text( strlen( "PONG" ) );
+//				auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
+//				const auto &packet = incomingData[ 0 ];
+//				std::string string( packet.begin( ), packet.end( ) );
+//				LOG( "[>>] '%s'", string.c_str( ) );
+//				if ( string.compare( "PONG" ) ) 
+//					throw std::runtime_error( "ping-pong mismatch" );
+//				LOG( "[~] sleep" );
+//				std::this_thread::sleep_for( sleep );
+//			}
 
-			std::swap( channelSending, channelReceiving );
-			Deferred::Sending sending( ctx, channelSending );
-			Deferred::Receiving receiving( ctx, channelReceiving, acceptEveryone );
-			while ( true ) {
-				LOG( "[<<] 'PING'" );
-				sending.text( "PING" );
-				Deferred::QueueCommands::instance( ).ticksAll( );
-
-				LOG( "[>>] ..." );
-				receiving.text( strlen( "PONG" ) );
-				auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
-				const auto &packet = incomingData[ 0 ];
-				std::string string( packet.begin( ), packet.end( ) );
-				LOG( "[>>] '%s'", string.c_str( ) );
-				if ( string.compare( "PONG" ) ) 
-					throw std::runtime_error( "ping-pong mismatch" );
-				LOG( "[~] sleep" );
+			std::chrono::seconds sleep{ 1 };
+			Deferred::PingPonger pingPonger( ctx );
+			LOG( "[~] press [Ctrl+C] to exit" );
+			while( true ) {
+				auto milli = pingPonger.pingerMeasure( );
+				LOG( "Reply from 'Epic-provided relay': bytes=4, time=%lldms", milli.count( ) );
 				std::this_thread::sleep_for( sleep );
 			}
 		}
