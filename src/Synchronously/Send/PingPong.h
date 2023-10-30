@@ -23,7 +23,7 @@ public:
 			return false;
 		}
 		// ticks in recv
-		messageData = receive_( );
+		messageData = receive_( ).value( );
 		if ( messageData.empty( ) ) {
 			LOG( "[sendPingWaitPong] fail pong" );
 			return false;

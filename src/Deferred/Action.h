@@ -24,6 +24,7 @@ public:
 	virtual ~Action()
 	{}
 
+	[[nodiscard]]
 	Networking::messageData_t act(
 		const QueueCommands::AvoidPush& avoidPush = QueueCommands::AvoidPush{ } 
 	) override {

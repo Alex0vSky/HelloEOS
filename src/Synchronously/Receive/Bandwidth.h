@@ -27,7 +27,7 @@ public:
 
 		LOG( "[~] c_countPackets: %zd", Networking::c_countPackets );
 		for ( size_t packet = 0; packet < Networking::c_countPackets; ++packet ) {
-			messageData = receive_( );
+			messageData = receive_( ).value( );
 			if ( !checkPacket_( messageData, &j ) )
 				return false;
 		}

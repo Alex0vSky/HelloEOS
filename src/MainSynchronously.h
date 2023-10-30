@@ -77,9 +77,9 @@ namespace syscross::HelloEOS { struct MainSynchronously {
 		if ( isServer ) {
 			LOG( "[~] server" );
 
-			Synchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
-			std::string message = chat.getMessage( );
-			LOG( "[~] message: '%s'", message.c_str( ) );
+//			Synchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
+//			std::string message = chat.getMessage( );
+//			LOG( "[~] message: '%s'", message.c_str( ) );
 
 //			Synchronously::Receive::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ) );
 //			if ( !bandwith.recvAndCheck( ) )
@@ -89,13 +89,21 @@ namespace syscross::HelloEOS { struct MainSynchronously {
 //			if ( !pingPong.recvPingAndAnswerPong( ) )
 //				return;
 
+			Synchronously::Receive::Chat chat( platformHandle, auth.getLocalUserId( ) );
+			std::string message = chat.getMessage( );
+			LOG( "[~] message: '%s'", message.c_str( ) );
+			Synchronously::Send::Chat chat2( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+			message = "PONG";
+			if ( !chat2.message( message ) )
+				return;
+
 		} else {
 			LOG( "[~] client" );
 
-			Synchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
-			std::string message = timeString;
-			if ( !chat.message( message ) )
-				return;
+//			Synchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+//			std::string message = timeString;
+//			if ( !chat.message( message ) )
+//				return;
 
 //			Synchronously::Send::Bandwidth bandwith( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
 //			size_t Bandwith;
@@ -105,6 +113,14 @@ namespace syscross::HelloEOS { struct MainSynchronously {
 //			Synchronously::Send::PingPong pingPong( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
 //			if ( !pingPong.sendPingWaitPong( ) )
 //				return;
+
+			Synchronously::Send::Chat chat( platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) );
+			std::string message = timeString;
+			if ( !chat.message( message, false ) )
+				return;
+			Synchronously::Receive::Chat chat2( platformHandle, auth.getLocalUserId( ) );
+			message = chat2.getMessage( );
+			LOG( "[~] message: '%s'", message.c_str( ) );
 		}
 		LOG( "[~] press any key to exit" );
 		getchar( );

@@ -122,7 +122,7 @@
     <ClInclude Include="..\src\Deferred\Sending.h">
       <Filter>Header Files\Deferred</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Deferred\Sender\Text.h">
+    <ClInclude Include="..\src\Deferred\Sender\SendText.h">
       <Filter>Header Files\Deferred</Filter>
     </ClInclude>
     <ClInclude Include="..\src\MainAnchronously.h">
@@ -134,7 +134,7 @@
     <ClInclude Include="..\src\Deferred\ConnectionRequestListener\AcceptEveryone.h">
       <Filter>Header Files\Deferred</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Deferred\Receiver\Text.h">
+    <ClInclude Include="..\src\Deferred\Receiver\RecvText.h">
       <Filter>Header Files\Deferred</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Networking.h">

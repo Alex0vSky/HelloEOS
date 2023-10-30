@@ -27,26 +27,18 @@
 #include "Synchronously/Friend.h"
 #include "Synchronously/AccountMapping.h"
 #include "Synchronously/Presence.h"
-// TODO(alex): removeme
-#include "Synchronously/Send/BaseSend.h"
 #include "Deferred/Ctx.h"
 #include "Deferred/ConnectionRequestListener/AcceptEveryone.h"
 #include "Deferred/QueueCommands.h"
 #include "Deferred/Action.h"
-#include "Deferred/Sender/Text.h"
-#include "Deferred/Receiver/Text.h"
+#include "Deferred/Sender/SendText.h"
+#include "Deferred/Receiver/RecvText.h"
 #include "Deferred/Sending.h"
 #include "Deferred/Receiving.h"
 
 namespace syscross::HelloEOS { struct MainDeferred {
 	void run(int argc) {
 		bool isServer = ( argc > 1 );
-
-		size_t j = 0;
-		LOG( "%zd", j++ );
-		LOG( "%zd", j++ );
-		LOG( L"%zd", j++ );
-		LOG( L"%zd", j++ );
 
 #pragma region prepare
 		InitializeEOS init;
@@ -86,28 +78,58 @@ namespace syscross::HelloEOS { struct MainDeferred {
 		Deferred::QueueCommands::init( platformHandle );
 		Deferred::Ctx ctx{ "CHAT", platformHandle, auth.getLocalUserId( ), mapping.getFriendLocalUserId( ) };
 		Deferred::ConnectionRequestListener::AcceptEveryone acceptEveryone( ctx );
+		uint8_t channelReceiving = 1;
+		uint8_t channelSending = 2;
 		if ( isServer ) {
 			LOG( "[~] server" );
-			Deferred::Receiving receiving( ctx, acceptEveryone );
-			auto len = strlen( "PING" );
-			auto command = receiving.text( len );
-			//command ->act( ); // OR
-			receiving.text( len ); // OR
+//			Deferred::Receiving receiving( ctx, acceptEveryone );
+//			auto len = strlen( "PING" );
+//			auto command = receiving.text( len );
+//			////command ->act( ); // OR
+//			//receiving.text( len ); // OR
+
+			Deferred::Receiving receiving( ctx, channelReceiving, acceptEveryone );
+			Deferred::Sending sending( ctx, channelSending );
+			while ( true ) {
+				LOG( "[>>] ..." );
+				receiving.text( strlen( "PING" ) );
+				auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
+				const auto &packet = incomingData[ 0 ];
+				std::string string( packet.begin( ), packet.end( ) );
+				LOG( "[>>] '%s'", string.c_str( ) );
+//				if ( !string.compare( "PING" ) ) 
+				LOG( "[<<] 'PONG'" );
+				sending.text( "PONG" );
+				Deferred::QueueCommands::instance( ).ticksAll( );
+				LOG( "[~] sleep" );
+				std::this_thread::sleep_for( std::chrono::seconds{ 1 } );
+			}
 
 		} else {
 			LOG( "[~] client" );
-			
-			Deferred::Sending sending( ctx );
-			auto command = sending.text( "PING" );
-			// Second
-			command ->act( );
-		}
-		auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
-		//for ( size_t i = 0; i < incomingData.size( ); ++i ) {
-		size_t i = 0;
-		for ( const auto &packet : incomingData ) {
-			std::string string( packet.begin( ), packet.end( ) );
-			LOG( "[~] text #%zd: '%s'", i++, string.c_str( ) );
+//			Deferred::Sending sending( ctx );
+//			auto command = sending.text( "PING" );
+//			//// Second
+//			//command ->act( );
+
+			std::swap( channelSending, channelReceiving );
+			Deferred::Sending sending( ctx, channelSending );
+			Deferred::Receiving receiving( ctx, channelReceiving, acceptEveryone );
+			while ( true ) {
+				LOG( "[<<] 'PING'" );
+				sending.text( "PING" );
+				Deferred::QueueCommands::instance( ).ticksAll( );
+
+				LOG( "[>>] ..." );
+				receiving.text( strlen( "PONG" ) );
+				auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
+				const auto &packet = incomingData[ 0 ];
+				std::string string( packet.begin( ), packet.end( ) );
+				LOG( "[>>] '%s'", string.c_str( ) );
+				LOG( "[~] sleep" );
+				std::this_thread::sleep_for( std::chrono::seconds{ 1 } );
+			}
+
 		}
 		LOG( "[~] press any key to exit" );
 		getchar( );

@@ -16,7 +16,7 @@ public:
 		, BaseReceive( platformHandle, localUserId )
 	{}
 	bool recvPingAndAnswerPong() {
-		Networking::messageData_t messageData = receive_( );
+		Networking::messageData_t messageData = receive_( ).value( );
 		std::string stringRecv( messageData.begin( ), messageData.end( ) );
 		LOG( "[recvPingAndAnswerPong] stringRecv: '%s'", stringRecv.c_str( ) );
 		if ( 0 != stringRecv.compare( "PING" ) ) {

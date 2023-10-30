@@ -49,6 +49,7 @@ protected:
 			receivePacketOptions.MaxDataSizeBytes = len;
 		EOS_EResult result;
 		// to avoid truncating
+		if ( !doTick )
 		{
 			EOS_P2P_GetNextReceivedPacketSizeOptions Options = { EOS_P2P_GETNEXTRECEIVEDPACKETSIZE_API_LATEST };
 			Options.LocalUserId = m_LocalUserId;

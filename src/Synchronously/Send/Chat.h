@@ -5,12 +5,14 @@ class Chat : public BaseSend {
 	using BaseSend::BaseSend;
 
 public:
-	bool message(const std::string &text) {
+	bool message(const std::string &text, bool bTicks = true) {
 		if ( !sendPacket_( text ) )
 			return false;
 		// TODO(alex): no way to known deliverance now... If presence to Offline?
-		LOG( "[~] press [Ctrl+C] to exit" );
-		ticks_( );
+		if ( bTicks ) {
+			LOG( "[~] press [Ctrl+C] to exit" );
+			ticks_( );
+		}
 		return true;
 	}
 };

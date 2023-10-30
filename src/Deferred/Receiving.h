@@ -3,24 +3,28 @@
 namespace syscross::HelloEOS::Deferred {
 class Receiving {
 	Ctx m_ctx;
+	uint8_t m_channel;
+
 public:
 	// For recv need to have instance of Acceptor
-	Receiving(Ctx ctx, const ConnectionRequestListener::BaseAcceptor &) : 
+	Receiving(Ctx ctx, uint8_t channel, const ConnectionRequestListener::BaseAcceptor &) : 
 		m_ctx( ctx )
+		, m_channel( channel )
 	{}
 	auto text(size_t len) {
 		if ( len > Networking::c_MaxDataSizeBytes )
 			throw std::runtime_error( "exceed maximum packet lenght" );
-		auto executor = std::make_shared< Receiver::Text >( m_ctx );
+		auto executor = std::make_shared< Receiver::RecvText >( m_ctx, m_channel );
 		auto command = detail_::make_action(
 				QueueCommands::Direction::Incoming
-				, [len] (const std::shared_ptr< Receiver::Text > &p) { 
-					Networking::messageData_t messageData = p ->receive_( false, len );
+				, [len] (const std::shared_ptr< Receiver::RecvText > &p) { 
+					Networking::messageData_t messageData = p ->receive_( len );
 					return messageData;
 				}
 				, executor 
 			);
-		command ->act( );
+		//command ->act( );
+		Deferred::QueueCommands::instance( ).push( command );
 		return command;
 	}
 };

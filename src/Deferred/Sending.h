@@ -3,27 +3,25 @@
 namespace syscross::HelloEOS::Deferred {
 class Sending {
 	Ctx m_ctx;
+	uint8_t m_channel;
+
 public:
-	Sending(Ctx ctx) : 
+	Sending(Ctx ctx, uint8_t channel) : 
 		m_ctx( ctx )
+		, m_channel( channel )
 	{}
-	// discardable
 	auto text(const std::string &text) {
-		auto executor = std::make_shared< Sender::Text >( 
-			m_ctx.m_PlatformHandle
-			, m_ctx.m_LocalUserId
-			, m_ctx.m_FriendLocalUserId
-			, m_ctx.m_SocketName
-		);
+		auto executor = std::make_shared< Sender::SendText >( m_ctx, m_channel );
 		auto command = detail_::make_action(
 				QueueCommands::Direction::Outgoing
-				, [text] (const std::shared_ptr< Sender::Text > &p) { 
+				, [text] (const std::shared_ptr< Sender::SendText > &p) { 
 					p ->sendTextPacket_( text );
 					return Networking::messageData_t{ };
 				}
 				, executor 
 			);
-		command ->act( );
+		//command ->act( );
+		Deferred::QueueCommands::instance( ).push( command );
 		return command;
 	}
 };
