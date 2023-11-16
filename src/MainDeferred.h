@@ -73,7 +73,8 @@ namespace syscross::HelloEOS { struct MainDeferred {
 
 		char timeString[ 64 ];
 		std::time_t t = std::time( nullptr );
-		std::strftime( timeString, sizeof( timeString ), "%A %c", std::localtime( &t ) );
+		std::tm bt; localtime_s( &bt, &t );
+		std::strftime( timeString, sizeof( timeString ), "%A %c", &bt );
 #pragma endregion // prepare
 
 		Deferred::QueueCommands::init( platformHandle );

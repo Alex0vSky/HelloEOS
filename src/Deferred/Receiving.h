@@ -26,5 +26,18 @@ public:
 		Deferred::QueueCommands::instance( ).push( command );
 		return command;
 	}
+	auto vector() {
+		auto executor = std::make_shared< Receiver::RecvText >( m_ctx, m_channel );
+		auto command = detail_::make_action(
+				QueueCommands::Direction::Incoming
+				, [] (const std::shared_ptr< Receiver::RecvText > &p) { 
+					Networking::messageData_t messageData = p ->receive_( );
+					return messageData;
+				}
+				, executor 
+			);
+		Deferred::QueueCommands::instance( ).push( command );
+		return command;
+	}
 };
 } // namespace syscross::HelloEOS::Deferred

@@ -4,7 +4,8 @@ namespace syscross::HelloEOS::Deferred {
 namespace detail_ { template <typename F, typename... Ts> class Action; } // namespace detail_
 class QueueCommands {
 	static constexpr std::chrono::seconds c_commandTO{ 30 };
-	static constexpr std::chrono::milliseconds c_sleep{ 15 };
+	//static constexpr std::chrono::milliseconds c_sleep{ 15 };
+	static constexpr std::chrono::milliseconds c_sleep{ 200 };
 	static constexpr auto now = std::chrono::system_clock::now;
 	EOS_HPlatform m_platformHandle;
 	EOS_HP2P m_p2PHandle;
@@ -83,7 +84,8 @@ public:
 		return getInstanceImpl( );
 	}
 	auto ticksAll() {
-		LOG( "[ticksAll] fifo size: %zd", m_fifo.size( ) );
+		if ( m_fifo.size( ) )
+			LOG( "[ticksAll] fifo size: %zd", m_fifo.size( ) );
 		std::vector< Networking::messageData_t > allIncomingData;
 		sptr_t command;
 		unsigned int count = 0;
@@ -93,6 +95,7 @@ public:
 			// If there is already an open connection to this peer, it will be sent immediately
 			if ( Direction::Outgoing == command ->getDirection( ) ) {
 				command ->act( m_avoidPush );
+				// TODO(alex): process "[LogEOSP2P] Connection closed. LocalUserId=[000...6e2] RemoteUserId=[000...7e5] SocketId=[CHAT] Reason=[TimedOut]"
 				tick( );
 				getQueueInfo( );
 				if ( !m_OutgoingSize ) {

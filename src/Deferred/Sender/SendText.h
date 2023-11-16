@@ -7,6 +7,9 @@ class SendText {
 	EOS_P2P_SocketId m_sendSocketId;
 	EOS_P2P_SendPacketOptions m_options;
 
+	// tmp
+	// TODO(alex): base and multiple sender classes, or single SendText=SendOrdinary
+public:
 	template<typename T>
 	void sendPacket_(const T &value) {
 		Networking::messageData_t messageData( value.begin( ), value.end( ) );

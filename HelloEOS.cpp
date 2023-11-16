@@ -3,7 +3,8 @@
 #include "stdafx.h"
 //#include "MainSynchronously.h"
 //#include "MainAnchronously.h"
-#include "MainDeferred.h"
+//#include "MainDeferred.h"
+#include "Main_gRpc.h"
 
 int main(int argc, char *argv[]) {
 #ifdef _DEBUG
@@ -12,7 +13,12 @@ int main(int argc, char *argv[]) {
 #endif
 	//syscross::HelloEOS::MainSynchronously main;
 	//syscross::HelloEOS::MainAnchronously main;
-	syscross::HelloEOS::MainDeferred main;
-	main.run( argc );
+	//syscross::HelloEOS::MainDeferred main;
+	syscross::HelloEOS::Main_gRpc main;
+	try {
+		main.run( argc );
+	} catch (std::exception &exc) {
+		printf( "std::exception::what = '%s'", exc.what( ) );
+	}
 	return 0;
 }

@@ -28,6 +28,12 @@
     <Filter Include="Header Files\Deferred">
       <UniqueIdentifier>{17a666c9-2957-4547-b1f8-0733648648e6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gRpc">
+      <UniqueIdentifier>{5948e6ca-4bf1-4b54-9601-73dcf9397fff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gRpc">
+      <UniqueIdentifier>{e13c2541-afe6-4b3d-b9fb-77fe4902bb3d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -35,6 +41,15 @@
     </ClCompile>
     <ClCompile Include="..\HelloEOS.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gRpc\helloworld.grpc.pb.cc">
+      <Filter>Source Files\gRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gRpc\helloworld.pb.cc">
+      <Filter>Source Files\gRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\_L\net\gRpcSource\grpc-1.58.2\test\cpp\util\proto_reflection_descriptor_database.cc">
+      <Filter>Source Files\gRpc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -143,10 +158,27 @@
     <ClInclude Include="..\src\Deferred\PingPonger.h">
       <Filter>Header Files\Deferred</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Main_gRpc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gRpc\mix.h">
+      <Filter>Header Files\gRpc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resource\HelloEOS.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="..\..\..\_L\3d\EOS_SDK\SDK\Bin\EOSSDK-Win32-Shipping.dll">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\..\..\_L\3d\EOS_SDK\SDK\Bin\EOSSDK-Win64-Shipping.dll">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>
