@@ -12,7 +12,7 @@
 			auto now = system_clock::now( );														\
 			auto ms = duration_cast<milliseconds>(now.time_since_epoch()) % 1000;					\
 			auto timer = system_clock::to_time_t(now);												\
-			std::tm bt = *std::localtime(&timer);													\
+			std::tm bt; localtime_s(&bt, &timer);													\
 			std::ostringstream ossA;																\
 			ossA << std::put_time(&bt, "%T");														\
 			ossA << '.' << std::setfill('0') << std::setw(3) << ms.count() << " | ";				\
@@ -29,7 +29,7 @@
 					, (void)0																		\
 					)																				\
 				: (																					\
-					_snwprintf( bufW, 1024, (const wchar_t *)( fmt ), __VA_ARGS__ )					\
+					_snwprintf_s( bufW, 1024, (const wchar_t *)( fmt ), __VA_ARGS__ )				\
 					, dateTimeW += bufW																\
 					, dateTimeW += L"\n"															\
 					, wprintf( dateTimeW.c_str( ) )													\

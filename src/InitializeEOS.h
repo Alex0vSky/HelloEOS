@@ -4,7 +4,7 @@ namespace syscross::HelloEOS {
 class InitializeEOS {
 	EOS_HPlatform m_PlatformHandle = nullptr;
 
-	static void EOSSDKLoggingCallback_(const EOS_LogMessage* InMsg) {
+	static void EOS_CALL EOSSDKLoggingCallback_(const EOS_LogMessage* InMsg) {
 		LOG( "[%s] %s", InMsg ->Category, InMsg ->Message );
 		::OutputDebugStringA( InMsg ->Category );
 		::OutputDebugStringA( InMsg ->Message );

@@ -12,7 +12,7 @@ class AccountMapping {
 
 	std::atomic_bool m_bMapping = false;
 
-	static void OnQueryExternalAccountMappingsCallback(const EOS_Connect_QueryExternalAccountMappingsCallbackInfo* Data) {
+	static void EOS_CALL OnQueryExternalAccountMappingsCallback(const EOS_Connect_QueryExternalAccountMappingsCallbackInfo* Data) {
 		AccountMapping *self = reinterpret_cast<AccountMapping *>( Data ->ClientData );
 		if ( EOS_EResult::EOS_Success != Data ->ResultCode ) {
 			LOG( "[OnQueryExternalAccountMappingsCallback] %d", (int)Data ->ResultCode );

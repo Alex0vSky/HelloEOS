@@ -32,6 +32,7 @@ public:
 	struct ICommand {
 		virtual Networking::messageData_t act(const QueueCommands::AvoidPush& ) = 0;
 		virtual Direction getDirection() const = 0;
+		virtual ~ICommand() {}
 	};
 	typedef std::shared_ptr< ICommand > sptr_t;
 

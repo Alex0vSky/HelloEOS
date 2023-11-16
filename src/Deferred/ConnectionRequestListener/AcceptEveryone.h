@@ -10,7 +10,7 @@ class AcceptEveryone : public BaseAcceptor {
 	EOS_P2P_SocketId m_SocketId;
 	EOS_NotificationId m_notificationId;
 	// TODO(alex): dont repeat youself
-	static void OnIncomingConnectionRequest_(const EOS_P2P_OnIncomingConnectionRequestInfo* Data) {
+	static void EOS_CALL OnIncomingConnectionRequest_(const EOS_P2P_OnIncomingConnectionRequestInfo* Data) {
 		if ( !Data )
 			return;
 		AcceptEveryone *self = reinterpret_cast<AcceptEveryone *>( Data ->ClientData );

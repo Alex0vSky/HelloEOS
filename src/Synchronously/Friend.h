@@ -17,7 +17,7 @@ private:
 	friends_t m_NewFriends;
 	std::atomic_bool m_bFriends = false;
 
-	static void QueryFriendsCompleteCallbackFn(const EOS_Friends_QueryFriendsCallbackInfo* Data) {
+	static void EOS_CALL QueryFriendsCompleteCallbackFn(const EOS_Friends_QueryFriendsCallbackInfo* Data) {
 		Friend *self = reinterpret_cast<Friend *>( Data ->ClientData );
 		if ( false ) {
 		} else if ( EOS_EResult::EOS_Success == Data ->ResultCode ) {

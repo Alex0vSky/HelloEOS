@@ -6,7 +6,7 @@ class Presence {
 	EOS_EpicAccountId m_epicAccountId;
 	std::atomic_bool m_bPresence = false;
 
-	static void SetPresenceCallbackFn(const EOS_Presence_SetPresenceCallbackInfo* Data) {
+	static void EOS_CALL SetPresenceCallbackFn(const EOS_Presence_SetPresenceCallbackInfo* Data) {
 		if ( !Data )
 			return;
 		// Operation is retrying so it is not complete yet

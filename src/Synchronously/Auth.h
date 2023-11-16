@@ -9,7 +9,7 @@ class Auth {
 	std::atomic< EOS_ProductUserId > m_LocalUserId = nullptr;
 
 	// This function is asynchronous; the EOS SDK guarantees that your callback will run when the operation completes, regardless of whether it succeeds or fails.
-	static void LoginCompleteCallbackFn(const EOS_Auth_LoginCallbackInfo* Data) {
+	static void EOS_CALL LoginCompleteCallbackFn(const EOS_Auth_LoginCallbackInfo* Data) {
 		auto self = reinterpret_cast<Auth *>( Data ->ClientData );
 		if ( false ) {
 		} else if ( EOS_EResult::EOS_Success == Data ->ResultCode ) {
@@ -22,7 +22,7 @@ class Auth {
 		}
 	}
 
-	static void ConnectLoginCompleteCb(const EOS_Connect_LoginCallbackInfo* Data) {
+	static void EOS_CALL ConnectLoginCompleteCb(const EOS_Connect_LoginCallbackInfo* Data) {
 		auto self = reinterpret_cast<Auth *>( Data ->ClientData );
 		if (Data->ResultCode == EOS_EResult::EOS_Success) {
 			LOG( "[EOS SDK] Connect Login Complete - ProductUserId: %s"
