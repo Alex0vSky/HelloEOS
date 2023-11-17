@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 	try {
 		main.run( argc );
 	} catch (std::exception &exc) {
-		printf( "std::exception::what = '%s'", exc.what( ) );
+		printf( "[~] std::exception::what = '%s'", exc.what( ) );
 	}
 	return 0;
 }

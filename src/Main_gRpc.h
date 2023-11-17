@@ -90,7 +90,6 @@ class GreeterServiceImpl final : public Greeter::Service {
 #endif // A0S_GRPC
 #pragma endregion // endregion gRPC
 
-extern "C" int _kbhit( void );
 extern "C" int _getch( void );
 
 namespace syscross::HelloEOS { struct Main_gRpc {
@@ -176,110 +175,96 @@ namespace syscross::HelloEOS { struct Main_gRpc {
 #ifdef A0S_GRPC
 			// Standart helloworld
 			std::string server_address = "localhost:50051";
-			// Sync serv
 			GreeterServiceImpl service;
 			grpc::EnableDefaultHealthCheckService( true );
 			grpc::reflection::InitProtoReflectionServerBuilderPlugin( );
 			ServerBuilder serverBuilder;
-			// Listen on the given address without any authentication mechanism.
 			serverBuilder.AddListeningPort( server_address, grpc::InsecureServerCredentials( ) );
-			// Register "service" as the instance through which we'll communicate with
-			// clients. In this case it corresponds to an *synchronous* service.
 			serverBuilder.RegisterService( &service );
-			// Finally assemble the server.
 			std::unique_ptr<Server> server( serverBuilder.BuildAndStart( ) );
 			std::cout << "Server listening on " << server_address << std::endl;
-			std::thread unstoppable3([&server](){
-				// Wait for the server to shutdown. Note that some other thread must be responsible for shutting down the server for this call to ever return.
+			std::thread serverWorker([&server](){
 				server ->Wait( );
 			});
 
-			//std::thread unstoppable([&server, &ctx](){
-				gRpc::OverUdp grpcOverUdp( ctx );
-				// For client calls and reflection
-				std::shared_ptr<grpc::Channel> channelInProc = server ->InProcessChannel( grpc::ChannelArguments{ } );
-				::grpc::ProtoReflectionDescriptorDatabase reflection_db( channelInProc );
-				google::protobuf::DescriptorPool desc_pool( &reflection_db );
+			gRpc::OverUdp grpcOverUdp( ctx );
+			// For client calls and reflection
+			std::shared_ptr<grpc::Channel> channelInProc = server ->InProcessChannel( grpc::ChannelArguments{ } );
+			::grpc::ProtoReflectionDescriptorDatabase reflection_db( channelInProc );
+			google::protobuf::DescriptorPool desc_pool( &reflection_db );
+			google::protobuf::DynamicMessageFactory dmf;
 
-				LOG( "[~] press [ESC] to planning stop server loop end exit" );
-				// @insp SO/6171132/non-blocking-console-input-c
-				std::atomic<int> key = { };
-				const int ESC = 27;
-				std::thread modernCppSupercheckerCenturyXXI_peekch([&key](){
-						while ( true ) { key = _getch( ); }
-					});
-				while ( true ) {
-					if ( ESC == key )
-						break;
-					std::string fullySpecifiedMethod;
-					Networking::messageData_t fromUdp;
-					if ( !grpcOverUdp.recvUnary( &fullySpecifiedMethod, &fromUdp ) ) {
-						std::this_thread::sleep_for( std::chrono::milliseconds{ 1000 } );
-						continue;
-					}
+			LOG( "[~] press [ESC] to planning stop server loop end exit" );
+			// @insp SO/6171132/non-blocking-console-input-c
+			std::atomic<int> key = { };
+			const int ESC = 27;
+			std::thread modernCppSupercheckerCenturyXXI_peekch([&key](){
+					while ( true ) { key = _getch( ); }
+				});
+			modernCppSupercheckerCenturyXXI_peekch.detach( ); // leak
 
-					// Wrong will cause grpc::StatusCode::UNIMPLEMENTED
-					std::string package, serviceName, method;
-					if ( !grpcOverUdp.parseFullySpecifiedMethod( fullySpecifiedMethod, &package, &serviceName, &method ) )
-						throw std::runtime_error( "Cant parse fully-specified method name" );
+			while ( true ) {
+				if ( ESC == key )
+					break;
+				std::string fullySpecifiedMethod;
+				Networking::messageData_t fromUdp;
+				if ( !grpcOverUdp.recvUnary( &fullySpecifiedMethod, &fromUdp ) )
+					continue;
 
-					// Create input_type and output_type via DynamicMessageFactory
-					const google::protobuf::MethodDescriptor* method_desc = desc_pool.FindMethodByName( 
-							package + "." + serviceName + "." + method
-						);
-					if ( !method_desc )
-						throw std::runtime_error( "Unknown method in reflection" );
-					auto fullNameInputType = method_desc ->input_type( ) ->full_name( );
-					auto fullNameOutputType = method_desc ->output_type( ) ->full_name( );
-					const google::protobuf::Descriptor* request_desc = 
-						desc_pool.FindMessageTypeByName( fullNameInputType );
-					if ( !request_desc )
-						throw std::runtime_error( "Unknown request message in reflection" );
-					const google::protobuf::Descriptor* response_desc = 
-						desc_pool.FindMessageTypeByName( fullNameOutputType );
-					if ( !response_desc )
-						throw std::runtime_error( "Unknown response message in reflection" );
-					google::protobuf::DynamicMessageFactory dmf;
-					google::protobuf::Message* requestDyn = dmf.GetPrototype( request_desc ) ->New( );
-					google::protobuf::Message* responseDyn = dmf.GetPrototype( response_desc ) ->New( );
+				// Wrong method will cause grpc::StatusCode::UNIMPLEMENTED
+				std::string package, serviceName, method;
+				if ( !grpcOverUdp.parseFullySpecifiedMethod( fullySpecifiedMethod, &package, &serviceName, &method ) )
+					throw std::runtime_error( "Cant parse fully-specified method name" );
+				// Create input_type and output_type via DynamicMessageFactory
+				const google::protobuf::MethodDescriptor* method_desc = desc_pool.FindMethodByName( 
+						package + "." + serviceName + "." + method
+					);
+				if ( !method_desc )
+					throw std::runtime_error( "Unknown method in reflection" );
+				auto fullNameInputType = method_desc ->input_type( ) ->full_name( );
+				const google::protobuf::Descriptor* request_desc = 
+					desc_pool.FindMessageTypeByName( fullNameInputType );
+				auto fullNameOutputType = method_desc ->output_type( ) ->full_name( );
+				const google::protobuf::Descriptor* response_desc = 
+					desc_pool.FindMessageTypeByName( fullNameOutputType );
+				if ( !request_desc || !response_desc )
+					throw std::runtime_error( "Reflection error" );
+				google::protobuf::Message* requestDyn = dmf.GetPrototype( request_desc ) ->New( );
+				google::protobuf::Message* responseDyn = dmf.GetPrototype( response_desc ) ->New( );
+				if ( !requestDyn || !responseDyn )
+					throw std::runtime_error( "DynamicMessageFactory" );
 
-					const char *suffix_for_stats = nullptr;
-					grpc::internal::RpcMethod rmeth( 
-							fullySpecifiedMethod.c_str( )
-							, suffix_for_stats
-							, ::grpc::internal::RpcMethod::NORMAL_RPC 
-							, channelInProc
-						);
-					bool bParse = requestDyn ->ParseFromArray( fromUdp.data( ), fromUdp.size( ) );
-					if ( !bParse )
-						throw std::runtime_error( "Error ParseFromArray" );
-					std::string str, DebugString;
-					std::vector< unsigned char > toUdp;
-					grpc::Status stat;
-					grpc::ClientContext clientContextSingleCall;
-					stat = grpc::internal::BlockingUnaryCall
-						<google::protobuf::Message,google::protobuf::Message>
-						( channelInProc.get( ), rmeth, &clientContextSingleCall, *requestDyn, responseDyn );
-		
-					if ( stat.error_code() == grpc::StatusCode::UNIMPLEMENTED )
-						throw std::runtime_error( "Wrong fully-specified method name" );
-					if ( stat.error_code() == grpc::StatusCode::RESOURCE_EXHAUSTED )
-						throw std::runtime_error( "Too many queries" );
-					if ( !stat.ok( ) )
-						throw std::runtime_error( "Error BlockingUnaryCall" );
-					toUdp.resize( responseDyn ->ByteSizeLong( ) );
-					bool bSerialize = responseDyn ->SerializeToArray( toUdp.data( ), toUdp.size( ) );
-					if ( !bSerialize )
-						throw std::runtime_error( "Error in serialization" );
-					grpcOverUdp.sendResponseUnary( toUdp );
-				}
+				const char *suffix_for_stats = nullptr;
+				grpc::internal::RpcMethod rmeth( 
+						fullySpecifiedMethod.c_str( )
+						, suffix_for_stats
+						, ::grpc::internal::RpcMethod::NORMAL_RPC 
+						, channelInProc
+					);
+				bool bParse = requestDyn ->ParseFromArray( fromUdp.data( ), fromUdp.size( ) );
+				if ( !bParse )
+					throw std::runtime_error( "Error ParseFromArray" );
 
-			//});
+				grpc::ClientContext clientContextSingleCall;
+				grpc::Status stat = grpc::internal::BlockingUnaryCall
+					<google::protobuf::Message,google::protobuf::Message>
+					( channelInProc.get( ), rmeth, &clientContextSingleCall, *requestDyn, responseDyn );		
+				if ( stat.error_code() == grpc::StatusCode::UNIMPLEMENTED )
+					throw std::runtime_error( "Wrong fully-specified method name" );
+				if ( stat.error_code() == grpc::StatusCode::RESOURCE_EXHAUSTED )
+					throw std::runtime_error( "Too many queries" );
+				if ( !stat.ok( ) )
+					throw std::runtime_error( "Error BlockingUnaryCall" );
 
-			//// Wait for the server to shutdown. Note that some other thread must be responsible for shutting down the server for this call to ever return.
-			//server ->Wait( );
+				Networking::messageData_t toUdp( responseDyn ->ByteSizeLong( ) );
+				bool bSerialize = responseDyn ->SerializeToArray( toUdp.data( ), toUdp.size( ) );
+				if ( !bSerialize )
+					throw std::runtime_error( "Error in serialization" );
+				grpcOverUdp.sendResponseUnary( toUdp );
+			}
+
 			server ->Shutdown( );
-			unstoppable3.join( );
+			serverWorker.join( );
 
 #endif // A0S_GRPC
 
@@ -316,16 +301,11 @@ namespace syscross::HelloEOS { struct Main_gRpc {
 			//}
 
 #ifdef A0S_GRPC
-			gRpc::OverUdp grpcOverUdp( ctx );
-
-			//// tmp
-			//std::string fullySpecifiedMethod = "/helloworld.Greeter/SayHello";
-			//Networking::messageData_t toUdp = { 0x0a, 0x05, 0x77, 0x6f, 0x72, 0x6c, 0x64 };
-			//Networking::messageData_t fromUdp = grpcOverUdp.sendUnary( fullySpecifiedMethod, toUdp );
-			//fromUdp = fromUdp;
-
-			// +TODO(alex): makeme
-			std::shared_ptr<Channel> grpcOverUdpChannel = gRpc::Factory::channel( grpcOverUdp );
+			// naming variants
+			//std::shared_ptr<Channel> grpcOverUdpChannel = gRpc::xxx::createChannel( grpcOverUdp );
+			//std::shared_ptr<Channel> grpcOverUdpChannel = gRpc::TypeIndepInterceptor::createChannel( grpcOverUdp );
+			//std::shared_ptr<Channel> grpcOverUdpChannel = gRpc::Channel::typeIndepInterceptor( grpcOverUdp );
+			std::shared_ptr<Channel> grpcOverUdpChannel = gRpc::Factory::channel( ctx );
 			// Standart helloworld
 			GreeterClient greeter( grpcOverUdpChannel );
 			std::string user( "world" );

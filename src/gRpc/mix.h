@@ -5,12 +5,17 @@ class OverUdp {
 	using Ctx = Deferred::Ctx;
 	using AcceptEveryone = Deferred::ConnectionRequestListener::AcceptEveryone;
 	using messageData_t = Networking::messageData_t;
+	using io_send = Deferred::Sending;
+	using io_recv = Deferred::Receiving;
 
 	// Magic, signature `gRpc over udp` protocol implementation
 	static const unsigned int c_magic = 0x12345678;
 	// Numerical version of current `gRpc over udp` protocol implementation
 	static const unsigned int c_version = 1;
 	// TODO(alex): commands //static const unsigned int c_commandRequest = 1; //static const unsigned int c_commandResponse = 2;
+	enum class Command : uint32_t {
+		CallingSend, CallingResult
+	};
 
 	// RFC 9110, section 4.1
 	static const unsigned int c_maxStringLength = 8000;
@@ -29,19 +34,57 @@ public:
 		, m_acceptor( m_ctx )
 	{}
 
-//0x78, 0x56, 0x34, 0x12
-//, 0x01, 0x00, 0x00, 0x00
-//, 0x1c, 0x00, 0x00, 0x00, 0x2f, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x2e
-//, 0x47, 0x72, 0x65, 0x65, 0x74, 0x65, 0x72, 0x2f, 0x53, 0x61, 0x79, 0x48, 0x65, 0x6c, 0x6c, 0x6f
-//, 0x07, 0x00, 0x00, 0x00, 0x0a, 0x05, 0x77, 0x6f, 0x72, 0x6c, 0x64
+	struct Packet {
+		class Header {
+			google::protobuf::io::ArrayOutputStream m_aos;
+			google::protobuf::io::ArrayInputStream m_ais;
+			std::unique_ptr< google::protobuf::io::CodedOutputStream > m_ostream;
+			std::unique_ptr< google::protobuf::io::CodedInputStream > m_istream;
+		public:
+			Header(messageData_t &messageData) :
+				m_aos( messageData.data( ), messageData.size( ) )
+				, m_ais( messageData.data( ), messageData.size( ) )
+			{
+				m_ostream = std::make_unique< google::protobuf::io::CodedOutputStream >
+					( &m_aos );
+			}
+			bool writeHeader(Command command) {
+				m_ostream ->WriteLittleEndian32( c_magic );
+				m_ostream ->WriteLittleEndian32( c_version );
+				m_ostream ->WriteLittleEndian32( (uint32_t)command );
+				return !m_ostream ->HadError( );
+			}
+			bool readHeader(const Command commandExpect) {
+				unsigned int signature, version;
+				Command command;
+				do {
+					if ( !m_istream ->ReadLittleEndian32( &signature ) )
+						break;
+					if ( c_magic != signature )
+						throw std::runtime_error( "signature mismatch" );
+					if ( !m_istream ->ReadLittleEndian32( &version ) )
+						break;
+					if ( c_version != version )
+						throw std::runtime_error( "version mismatch" );
+					if ( !m_istream ->ReadLittleEndian32( (uint32_t*)&command ) )
+						break;
+					if ( commandExpect != command )
+						break;
+					return true;
+				} while ( false );
+				return false;
+			}
+		};
+	};
 
-	messageData_t sendUnary(const std::string &fullySpecifiedMethod, const messageData_t &methodData) {
+	messageData_t callUnary(const std::string &fullySpecifiedMethod, const messageData_t &methodData) {
 		// Construct packet
 		auto lenMeth = static_cast<unsigned int>( fullySpecifiedMethod.length( ) );
 		auto lenData = static_cast<unsigned int>( methodData.size( ) );
 		messageData_t toEos( 0
 				+ sizeof( c_magic ) 
 				+ sizeof( c_version ) 
+				+ sizeof( Command ) 
 				+ sizeof( lenMeth ) 
 				+ fullySpecifiedMethod.length( ) 
 				+ sizeof( lenData ) 
@@ -50,27 +93,42 @@ public:
 		// @insp SO/68038083/how-to-decode-c-google-protocol-buffers-writevarint32-from-python
 		google::protobuf::io::ArrayOutputStream aos( toEos.data( ), toEos.size( ) );
 		google::protobuf::io::CodedOutputStream stream( &aos );
+
+//		Packet::Header packetHeader( toEos );
+//		packetHeader.writeHeader( Command::CallingSend );
+//		Packet::makeHeader( toEos, Command::CallingSend );
+//		Packet::parseToArray( toEos, Command::CallingSend );
+//		Packet::serializeToArray( toEos, Command::CallingSend );
+//		Packet::serializeToArray( Command::CallingSend );
+
+//		auto packet = Packet::create( Command::CallingSend );
+//		auto packet = Packet::create( Command::CallingSend, fullySpecifiedMethod, methodData );
+//		auto packet = Packet::createCalling( fullySpecifiedMethod, methodData );
+//		//packet.writeHeader( );
+//		toEos = packet.serializeToArray( );
+
 		stream.WriteLittleEndian32( c_magic );
 		stream.WriteLittleEndian32( c_version );
+		stream.WriteLittleEndian32( (uint32_t)Command::CallingSend );
 		stream.WriteLittleEndian32( lenMeth );
 		stream.WriteString( fullySpecifiedMethod );
 		stream.WriteLittleEndian32( lenData );
 		stream.WriteRaw( methodData.data( ), methodData.size( ) );
 		if ( stream.HadError( ) )
 			throw std::runtime_error( "protobuf write error" );
-		auto p = toEos.data( );
 		// Send packet
-		Deferred::Sending sending( m_ctx, m_channel );
+		io_send sending( m_ctx, m_channel );
 		sending.vector( toEos );
-		LOG( "[sendUnary] start ticks" );
+		LOG( "[callUnary] start ticks" );
 		Deferred::QueueCommands::instance( ).ticksAll( );
-		LOG( "[sendUnary] sended" );
-		// Recv packet
-		Deferred::Receiving receiving( m_ctx, m_channel, m_acceptor );
+		LOG( "[callUnary] sended" );
+		// Recv packet from sendResponseUnary
+		io_recv receiving( m_ctx, m_channel, m_acceptor );
+		Command::CallingResult;
 		receiving.vector( );
 		auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
-		LOG( "[sendUnary] incomingData size: %zd", incomingData.size( ) );
-		LOG( "[sendUnary] incomingData[0] size: %zd", incomingData[ 0 ].size( ) );
+		LOG( "[callUnary] incomingData size: %zd", incomingData.size( ) );
+		LOG( "[callUnary] incomingData[0] size: %zd", incomingData[ 0 ].size( ) );
 
 		messageData_t responseData = incomingData[ 0 ];
 		return responseData;
@@ -78,7 +136,8 @@ public:
 	bool sendResponseUnary(messageData_t responseData) {
 		// TODO(alex): signature and version, and command
 		// Send packet
-		Deferred::Sending sending( m_ctx, m_channel );
+		io_send sending( m_ctx, m_channel );
+		Command::CallingResult;
 		sending.vector( responseData );
 		LOG( "[sendResponseUnary] start ticks" );
 		Deferred::QueueCommands::instance( ).ticksAll( );
@@ -88,19 +147,25 @@ public:
 
 	bool recvUnary(std::string *fullySpecifiedMethod, messageData_t *methodData) {
 		// Recv packet
-		Deferred::Receiving receiving( m_ctx, m_channel, m_acceptor );
+		io_recv receiving( m_ctx, m_channel, m_acceptor );
+		Command::CallingSend;
 		receiving.vector( );
 		auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
 		if ( incomingData.empty( ) ) 
 			throw std::runtime_error( "recv error" );
 		// TODO(alex): exceptions or no... decision...
-		messageData_t fromEos = incomingData[ 0 ];
+		messageData_t fromEos = incomingData[ 0 ]; 
 		if ( fromEos.empty( ) ) 
 			return false;
 
 		unsigned int signature, version, lenMeth, lenData;
-		google::protobuf::io::ArrayInputStream aos( fromEos.data( ), fromEos.size( ) );
-		google::protobuf::io::CodedInputStream cis( &aos );
+		Command command;
+		google::protobuf::io::ArrayInputStream ais( fromEos.data( ), fromEos.size( ) );
+		google::protobuf::io::CodedInputStream cis( &ais );
+
+//		Packet::Header packetHeader( fromEos );
+//		packetHeader.readHeader( Command::CallingSend );
+
 		bool b;
 		b = cis.ReadLittleEndian32( &signature );
 		if ( !b )
@@ -112,6 +177,11 @@ public:
 			throw std::runtime_error( "read error" );
 		if ( c_version != version )
 			throw std::runtime_error( "version mismatch" );
+		b = cis.ReadLittleEndian32( (uint32_t*)&command );
+		if ( !b )
+			throw std::runtime_error( "read error" );
+		if ( Command::CallingSend != command )
+			throw std::runtime_error( "command mismatch" );
 		b = cis.ReadLittleEndian32( &lenMeth );
 		if ( !b )
 			throw std::runtime_error( "read error" );
@@ -155,11 +225,10 @@ namespace detail_ {
 namespace grpce = grpc::experimental;
 class TypeIndepInterceptor : public grpce::Interceptor {
 	grpce::ClientRpcInfo* m_info;
-	gRpc::OverUdp &m_grpcOverUdp;
+	// TODO(alex): unique_ptr and std::move, instead ref
+	gRpc::OverUdp m_grpcOverUdp;
 	Networking::messageData_t m_fromUdp;
 	void Intercept(grpce::InterceptorBatchMethods* methods) override {
-		//on send intercepted, send and recv to field: m_fromUdp = m_grpcOverUdp.sendUnary( );
-		//on recv intercepted assign m_fromUdp to response
 		using ihp = grpc::experimental::InterceptionHookPoints;
 		bool hijack = false;
 		std::string DebugString; // tmp
@@ -175,16 +244,14 @@ class TypeIndepInterceptor : public grpce::Interceptor {
 				LOG( "[Intercept] Deserialize not implemented" );
 				throw std::runtime_error( "Deserialize not implemented" );
 			}
-			std::vector< unsigned char > vecToUdp( req_msg ->ByteSizeLong( ) );
+			Networking::messageData_t vecToUdp( req_msg ->ByteSizeLong( ) );
 			bool bSerialize = req_msg ->SerializeToArray( vecToUdp.data( ), vecToUdp.size( ) );
 			if ( !bSerialize ) {
 				LOG( "[Intercept] Error in serialization" );
 				throw std::runtime_error( "Error in serialization" );
 			}
-			
-			// +TODO(alex): send vecToUdp to server via EOS ... and recv to m_fromUdp
-			// Its "/helloworld.Greeter/SayHello" Eq helloworld::HelloRequest::FullMessageName, from cpp_generator.cc
-			m_fromUdp = m_grpcOverUdp.sendUnary( m_info ->method( ), vecToUdp );
+			// `m_info ->method( )` Its "/helloworld.Greeter/SayHello" Eq helloworld::HelloRequest::FullMessageName, from cpp_generator.cc
+			m_fromUdp = m_grpcOverUdp.callUnary( m_info ->method( ), vecToUdp );
 	    }
 		if (methods->QueryInterceptionHookPoint(ihp::PRE_SEND_CLOSE)) {}
 		if (methods->QueryInterceptionHookPoint(ihp::PRE_RECV_MESSAGE)) {
@@ -213,30 +280,30 @@ class TypeIndepInterceptor : public grpce::Interceptor {
 		}
 	}
  public:
-	TypeIndepInterceptor(grpce::ClientRpcInfo* info, gRpc::OverUdp &grpcOverUdp) : 
+	TypeIndepInterceptor(grpce::ClientRpcInfo* info, const Deferred::Ctx &ctx) : 
 		m_info( info ) 
-		, m_grpcOverUdp( grpcOverUdp )
+		, m_grpcOverUdp( ctx )
 	{}
 };
 struct TypeIndepInterceptorFactory : public grpce::ClientInterceptorFactoryInterface {
-	gRpc::OverUdp &m_grpcOverUdp;
-	TypeIndepInterceptorFactory(gRpc::OverUdp &grpcOverUdp) : m_grpcOverUdp( grpcOverUdp )
+	Deferred::Ctx m_ctx;
+	TypeIndepInterceptorFactory(const Deferred::Ctx &ctx) : m_ctx( ctx )
 	{}
 	grpce::Interceptor* CreateClientInterceptor(grpce::ClientRpcInfo* info) override {
-		return new TypeIndepInterceptor( info, m_grpcOverUdp );
+		return new TypeIndepInterceptor( info, m_ctx );
 	}
 };
 } // detail_
 struct Factory {
 	// Channel isn't authenticated (use of InsecureChannelCredentials()).
 	static
-	std::shared_ptr<grpc::Channel> channel(gRpc::OverUdp &grpcOverUdp) {
+	std::shared_ptr<grpc::Channel> channel(const Deferred::Ctx &ctx) {
 		grpc::ChannelArguments args;
 		std::vector
 			< std::unique_ptr< grpc::experimental::ClientInterceptorFactoryInterface > >
 			interceptor_creators;
 		interceptor_creators.push_back( 
-				std::make_unique<detail_::TypeIndepInterceptorFactory>( grpcOverUdp ) 
+				std::make_unique<detail_::TypeIndepInterceptorFactory>( ctx ) 
 			);
 		return grpc::experimental::CreateCustomChannelWithInterceptors(
 				"localhost:50051"
