@@ -164,6 +164,9 @@
     <ClInclude Include="..\src\gRpc\mix.h">
       <Filter>Header Files\gRpc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\gRpc\Packet.h">
+      <Filter>Header Files\gRpc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resource\HelloEOS.rc">

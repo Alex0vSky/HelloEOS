@@ -36,6 +36,7 @@
 #include "Deferred/Sending.h"
 #include "Deferred/Receiving.h"
 #include "Deferred/PingPonger.h"
+#include "gRpc/Packet.h"
 #include "gRpc/mix.h"
 
 #pragma region gRPC

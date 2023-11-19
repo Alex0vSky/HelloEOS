@@ -34,49 +34,6 @@ public:
 		, m_acceptor( m_ctx )
 	{}
 
-	struct Packet {
-		class Header {
-			google::protobuf::io::ArrayOutputStream m_aos;
-			google::protobuf::io::ArrayInputStream m_ais;
-			std::unique_ptr< google::protobuf::io::CodedOutputStream > m_ostream;
-			std::unique_ptr< google::protobuf::io::CodedInputStream > m_istream;
-		public:
-			Header(messageData_t &messageData) :
-				m_aos( messageData.data( ), messageData.size( ) )
-				, m_ais( messageData.data( ), messageData.size( ) )
-			{
-				m_ostream = std::make_unique< google::protobuf::io::CodedOutputStream >
-					( &m_aos );
-			}
-			bool writeHeader(Command command) {
-				m_ostream ->WriteLittleEndian32( c_magic );
-				m_ostream ->WriteLittleEndian32( c_version );
-				m_ostream ->WriteLittleEndian32( (uint32_t)command );
-				return !m_ostream ->HadError( );
-			}
-			bool readHeader(const Command commandExpect) {
-				unsigned int signature, version;
-				Command command;
-				do {
-					if ( !m_istream ->ReadLittleEndian32( &signature ) )
-						break;
-					if ( c_magic != signature )
-						throw std::runtime_error( "signature mismatch" );
-					if ( !m_istream ->ReadLittleEndian32( &version ) )
-						break;
-					if ( c_version != version )
-						throw std::runtime_error( "version mismatch" );
-					if ( !m_istream ->ReadLittleEndian32( (uint32_t*)&command ) )
-						break;
-					if ( commandExpect != command )
-						break;
-					return true;
-				} while ( false );
-				return false;
-			}
-		};
-	};
-
 	messageData_t callUnary(const std::string &fullySpecifiedMethod, const messageData_t &methodData) {
 		// Construct packet
 		auto lenMeth = static_cast<unsigned int>( fullySpecifiedMethod.length( ) );
@@ -106,6 +63,12 @@ public:
 //		auto packet = Packet::createCalling( fullySpecifiedMethod, methodData );
 //		//packet.writeHeader( );
 //		toEos = packet.serializeToArray( );
+
+		//auto messageData = Packet::callingSend( fullySpecifiedMethod, methodData );
+//		toEos = packet.serializeToArray( );
+//		CallingResult // ?
+//		point is "dont repeat yourself", OOP?
+//		for inher and access methods and using .HadError( )
 
 		stream.WriteLittleEndian32( c_magic );
 		stream.WriteLittleEndian32( c_version );
@@ -158,6 +121,8 @@ public:
 		if ( fromEos.empty( ) ) 
 			return false;
 
+		//auto packet = Packet::callingSend( fromEos, fullySpecifiedMethod, methodData );
+//		toEos = packet.parseFromArray( );
 		unsigned int signature, version, lenMeth, lenData;
 		Command command;
 		google::protobuf::io::ArrayInputStream ais( fromEos.data( ), fromEos.size( ) );

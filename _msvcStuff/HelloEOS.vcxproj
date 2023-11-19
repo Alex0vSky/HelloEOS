@@ -274,6 +274,7 @@
     <ClInclude Include="..\src\Deferred\Sender\SendText.h" />
     <ClInclude Include="..\src\Deferred\Sending.h" />
     <ClInclude Include="..\src\gRpc\mix.h" />
+    <ClInclude Include="..\src\gRpc\Packet.h" />
     <ClInclude Include="..\src\HumanReadable.h" />
     <ClInclude Include="..\src\InitializeEOS.h" />
     <ClInclude Include="..\src\Log.h" />
