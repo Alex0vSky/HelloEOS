@@ -79,3 +79,5 @@
 
 #pragma warning( pop )
 #endif // A0S_GRPC
+
+#include "ThirdParty/Hexdump.hpp"

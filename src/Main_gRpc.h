@@ -95,6 +95,12 @@ extern "C" int _getch( void );
 
 namespace syscross::HelloEOS { struct Main_gRpc {
 	void run(int argc) {
+
+		std::string fullySpecifiedMethod = "fullySpecifiedMethod";
+		Networking::messageData_t methodData{ 1, 2, 3 };
+		// Construct packet
+		auto toEos = gRpc::Packet::send::calling( fullySpecifiedMethod, methodData );
+
 		bool isServer = ( argc > 1 );
 #ifndef A0S_GRPC
 		LOG( "[~] must be defined A0S_GRPC" );

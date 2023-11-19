@@ -36,49 +36,9 @@ public:
 
 	messageData_t callUnary(const std::string &fullySpecifiedMethod, const messageData_t &methodData) {
 		// Construct packet
-		auto lenMeth = static_cast<unsigned int>( fullySpecifiedMethod.length( ) );
-		auto lenData = static_cast<unsigned int>( methodData.size( ) );
-		messageData_t toEos( 0
-				+ sizeof( c_magic ) 
-				+ sizeof( c_version ) 
-				+ sizeof( Command ) 
-				+ sizeof( lenMeth ) 
-				+ fullySpecifiedMethod.length( ) 
-				+ sizeof( lenData ) 
-				+ methodData.size( ) 
-			);
-		// @insp SO/68038083/how-to-decode-c-google-protocol-buffers-writevarint32-from-python
-		google::protobuf::io::ArrayOutputStream aos( toEos.data( ), toEos.size( ) );
-		google::protobuf::io::CodedOutputStream stream( &aos );
-
-//		Packet::Header packetHeader( toEos );
-//		packetHeader.writeHeader( Command::CallingSend );
-//		Packet::makeHeader( toEos, Command::CallingSend );
-//		Packet::parseToArray( toEos, Command::CallingSend );
-//		Packet::serializeToArray( toEos, Command::CallingSend );
-//		Packet::serializeToArray( Command::CallingSend );
-
-//		auto packet = Packet::create( Command::CallingSend );
-//		auto packet = Packet::create( Command::CallingSend, fullySpecifiedMethod, methodData );
-//		auto packet = Packet::createCalling( fullySpecifiedMethod, methodData );
-//		//packet.writeHeader( );
-//		toEos = packet.serializeToArray( );
-
-		//auto messageData = Packet::callingSend( fullySpecifiedMethod, methodData );
-//		toEos = packet.serializeToArray( );
-//		CallingResult // ?
-//		point is "dont repeat yourself", OOP?
-//		for inher and access methods and using .HadError( )
-
-		stream.WriteLittleEndian32( c_magic );
-		stream.WriteLittleEndian32( c_version );
-		stream.WriteLittleEndian32( (uint32_t)Command::CallingSend );
-		stream.WriteLittleEndian32( lenMeth );
-		stream.WriteString( fullySpecifiedMethod );
-		stream.WriteLittleEndian32( lenData );
-		stream.WriteRaw( methodData.data( ), methodData.size( ) );
-		if ( stream.HadError( ) )
-			throw std::runtime_error( "protobuf write error" );
+		messageData_t toEos = Packet::send::calling( fullySpecifiedMethod, methodData );
+		LOG( "[callUnary] Hexdump1" );
+		std::cout << Hexdump( toEos.data( ), toEos.size( ) );
 		// Send packet
 		io_send sending( m_ctx, m_channel );
 		sending.vector( toEos );
@@ -94,6 +54,8 @@ public:
 		LOG( "[callUnary] incomingData[0] size: %zd", incomingData[ 0 ].size( ) );
 
 		messageData_t responseData = incomingData[ 0 ];
+		LOG( "[callUnary] Hexdump2" );
+		std::cout << Hexdump( responseData.data( ), responseData.size( ) );
 		return responseData;
 	}
 	bool sendResponseUnary(messageData_t responseData) {
@@ -116,20 +78,22 @@ public:
 		auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
 		if ( incomingData.empty( ) ) 
 			throw std::runtime_error( "recv error" );
+		LOG( "[recvUnary] incomingData size: %zd", incomingData.size( ) );
 		// TODO(alex): exceptions or no... decision...
 		messageData_t fromEos = incomingData[ 0 ]; 
 		if ( fromEos.empty( ) ) 
-			return false;
+			//return false;
+			throw std::runtime_error( "recv format error" );
+		LOG( "[callUnary] Hexdump1" );
+		std::cout << Hexdump( fromEos.data( ), fromEos.size( ) );
 
-		//auto packet = Packet::callingSend( fromEos, fullySpecifiedMethod, methodData );
+		//auto packet = 
+		Packet::recv::calling( fromEos, fullySpecifiedMethod, methodData );
 //		toEos = packet.parseFromArray( );
 		unsigned int signature, version, lenMeth, lenData;
 		Command command;
 		google::protobuf::io::ArrayInputStream ais( fromEos.data( ), fromEos.size( ) );
 		google::protobuf::io::CodedInputStream cis( &ais );
-
-//		Packet::Header packetHeader( fromEos );
-//		packetHeader.readHeader( Command::CallingSend );
 
 		bool b;
 		b = cis.ReadLittleEndian32( &signature );
