@@ -10,5 +10,5 @@ Checking the Epic Online Services (EOS) p2p relays in different ways in C++
 - [x] PING-PONG
 - [x] measure ping in milli
 - [x] gRPC, 'poc' unary calls over UDP
-- [ ] more responsible bandwidth measurement
+- [-] (declined)more responsible bandwidth measurement
 - [ ] UnrealEngine UObject-s Serialize/Deserialize, replication
