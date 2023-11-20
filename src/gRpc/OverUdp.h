@@ -22,8 +22,7 @@ public:
 	messageData_t callUnary(const std::string &fullySpecifiedMethod, const messageData_t &methodData) {
 		// Construct packet
 		messageData_t toEos = Packet::Send::calling( fullySpecifiedMethod, methodData );
-		LOG( "[callUnary] Hexdump1" );
-		std::cout << Hexdump( toEos.data( ), toEos.size( ) );
+		//std::cout << Hexdump( toEos.data( ), toEos.size( ) );
 		// Send packet
 		io_send sending( m_ctx, m_channel );
 		sending.vector( toEos );
@@ -34,16 +33,12 @@ public:
 		io_recv receiving( m_ctx, m_channel, m_acceptor );
 		receiving.vector( );
 		auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
-		LOG( "[callUnary] incomingData size: %zd", incomingData.size( ) );
-		LOG( "[callUnary] incomingData[0] size: %zd", incomingData[ 0 ].size( ) );
+		if ( incomingData.empty( ) ) 
+			return { };
 
 		messageData_t responseData = incomingData[ 0 ];
-		LOG( "[callUnary] Hexdump2" );
-		std::cout << Hexdump( responseData.data( ), responseData.size( ) );
 		messageData_t methodResult;
 		Packet::Recv::result( responseData, &methodResult );
-		LOG( "[callUnary] Hexdump3" );
-		std::cout << Hexdump( methodResult.data( ), methodResult.size( ) );
 		return methodResult;
 	}
 	bool sendResponseUnary(messageData_t responseData) {
@@ -63,14 +58,10 @@ public:
 		auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
 		if ( incomingData.empty( ) ) 
 			throw std::runtime_error( "recv error" );
-		LOG( "[recvUnary] incomingData size: %zd", incomingData.size( ) );
 		messageData_t fromEos = incomingData[ 0 ]; 
 		if ( fromEos.empty( ) ) 
 			return false;
-		LOG( "[callUnary] Hexdump1" );
-		std::cout << Hexdump( fromEos.data( ), fromEos.size( ) );
 		Packet::Recv::calling( fromEos, fullySpecifiedMethod, methodData );
-		std::cout << Hexdump( methodData ->data( ), methodData ->size( ) );
 
 		return true;
 	}
