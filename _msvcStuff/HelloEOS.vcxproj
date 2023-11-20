@@ -144,16 +144,18 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|Win32'">
     <ClCompile>
       <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>A0S_GRPC;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <!-- <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary> -->
+      <!-- <PreprocessorDefinitions>A0S_GRPC;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions> -->
       <!-- <AdditionalIncludeDirectories>src;..\_msvcStuff;..\src;..\resource;C:\Prj\_L\3d\EOS_SDK\SDK\Include;C:\Prj\_L\net\gRpcDebugFull_x86\include;C:\Prj\_L\net\gRpcSource\grpc-1.58.2;</AdditionalIncludeDirectories> -->
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>A0S_GRPC;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>src;..\_msvcStuff;..\src;..\resource;C:\Prj\_L\3d\EOS_SDK\SDK\Include;C:\Prj\_L\net\gRpcDebug_x86\include;C:\Prj\_L\net\gRpcSource\grpc-1.58.2;</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <SupportJustMyCode>false</SupportJustMyCode>
       <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/Zc:sizedDealloc- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -244,15 +246,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\_L\net\gRpcSource\grpc-1.58.2\test\cpp\util\proto_reflection_descriptor_database.cc" />
-    <ClCompile Include="..\HelloEOS.cpp" />
-    <ClCompile Include="..\src\gRpc\helloworld.grpc.pb.cc">
-      <ExcludedFromBuild Condition="true">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|Win32'">false</ExcludedFromBuild>
+    <ClCompile Include="..\..\..\_L\net\gRpcSource\grpc-1.58.2\test\cpp\util\proto_reflection_descriptor_database.cc">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|Win32'">/Zc:sizedDealloc- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="..\src\gRpc\helloworld.pb.cc">
+    <ClCompile Include="..\HelloEOS.cpp" />
+    <ClCompile Include="..\src\gRpc\proto\helloworld.grpc.pb.cc">
       <ExcludedFromBuild Condition="true">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|Win32'">false</ExcludedFromBuild>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|Win32'">/Zc:sizedDealloc- %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\src\gRpc\proto\helloworld.pb.cc">
+      <ExcludedFromBuild Condition="true">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|Win32'">false</ExcludedFromBuild>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|Win32'">/Zc:sizedDealloc- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="true">Create</PrecompiledHeader>
@@ -273,8 +279,14 @@
     <ClInclude Include="..\src\Deferred\Receiver\RecvText.h" />
     <ClInclude Include="..\src\Deferred\Sender\SendText.h" />
     <ClInclude Include="..\src\Deferred\Sending.h" />
-    <ClInclude Include="..\src\gRpc\mix.h" />
-    <ClInclude Include="..\src\gRpc\Packet.h" />
+    <ClInclude Include="..\src\gRpc\Channel\Factory.h" />
+    <ClInclude Include="..\src\gRpc\Channel\TypeIndepInterceptor.h" />
+    <ClInclude Include="..\src\gRpc\OverUdp.h" />
+    <ClInclude Include="..\src\gRpc\Packet\BaseHeader.h" />
+    <ClInclude Include="..\src\gRpc\Packet\Input.h" />
+    <ClInclude Include="..\src\gRpc\Packet\Output.h" />
+    <ClInclude Include="..\src\gRpc\Packet\Recv.h" />
+    <ClInclude Include="..\src\gRpc\Packet\Send.h" />
     <ClInclude Include="..\src\HumanReadable.h" />
     <ClInclude Include="..\src\InitializeEOS.h" />
     <ClInclude Include="..\src\Log.h" />

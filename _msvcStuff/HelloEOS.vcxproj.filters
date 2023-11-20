@@ -34,6 +34,12 @@
     <Filter Include="Header Files\gRpc">
       <UniqueIdentifier>{e13c2541-afe6-4b3d-b9fb-77fe4902bb3d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\gRpc\Packet">
+      <UniqueIdentifier>{f4fa30a8-e2f6-41aa-9f21-08d79e3939ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gRpc\Channel">
+      <UniqueIdentifier>{45abbcec-730e-42a7-8b80-879cbdc4332b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -42,13 +48,13 @@
     <ClCompile Include="..\HelloEOS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gRpc\helloworld.grpc.pb.cc">
-      <Filter>Source Files\gRpc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\gRpc\helloworld.pb.cc">
-      <Filter>Source Files\gRpc</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\_L\net\gRpcSource\grpc-1.58.2\test\cpp\util\proto_reflection_descriptor_database.cc">
+      <Filter>Source Files\gRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gRpc\proto\helloworld.pb.cc">
+      <Filter>Source Files\gRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gRpc\proto\helloworld.grpc.pb.cc">
       <Filter>Source Files\gRpc</Filter>
     </ClCompile>
   </ItemGroup>
@@ -161,11 +167,29 @@
     <ClInclude Include="..\src\Main_gRpc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\gRpc\mix.h">
+    <ClInclude Include="..\src\gRpc\OverUdp.h">
       <Filter>Header Files\gRpc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\gRpc\Packet.h">
-      <Filter>Header Files\gRpc</Filter>
+    <ClInclude Include="..\src\gRpc\Packet\Send.h">
+      <Filter>Header Files\gRpc\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gRpc\Packet\BaseHeader.h">
+      <Filter>Header Files\gRpc\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gRpc\Packet\Input.h">
+      <Filter>Header Files\gRpc\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gRpc\Packet\Output.h">
+      <Filter>Header Files\gRpc\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gRpc\Packet\Recv.h">
+      <Filter>Header Files\gRpc\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gRpc\Channel\TypeIndepInterceptor.h">
+      <Filter>Header Files\gRpc\Channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gRpc\Channel\Factory.h">
+      <Filter>Header Files\gRpc\Channel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

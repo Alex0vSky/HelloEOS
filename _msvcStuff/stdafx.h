@@ -71,7 +71,7 @@
 #include "google/protobuf/reflection_ops.h"
 #include "google/protobuf/wire_format.h"
 
-#include "gRpc/helloworld.grpc.pb.h"
+#include "gRpc/proto/helloworld.grpc.pb.h"
 
 // Reflection
 #include "test/cpp/util/proto_reflection_descriptor_database.h"

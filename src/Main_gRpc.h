@@ -36,8 +36,14 @@
 #include "Deferred/Sending.h"
 #include "Deferred/Receiving.h"
 #include "Deferred/PingPonger.h"
-#include "gRpc/Packet.h"
-#include "gRpc/mix.h"
+#include "gRpc/Packet/BaseHeader.h"
+#include "gRpc/Packet/Input.h"
+#include "gRpc/Packet/Output.h"
+#include "gRpc/Packet/Recv.h"
+#include "gRpc/Packet/Send.h"
+#include "gRpc/OverUdp.h"
+#include "gRpc/Channel/TypeIndepInterceptor.h"
+#include "gRpc/Channel/Factory.h"
 
 #pragma region gRPC
 #ifdef A0S_GRPC
@@ -95,12 +101,6 @@ extern "C" int _getch( void );
 
 namespace syscross::HelloEOS { struct Main_gRpc {
 	void run(int argc) {
-
-		std::string fullySpecifiedMethod = "fullySpecifiedMethod";
-		Networking::messageData_t methodData{ 1, 2, 3 };
-		// Construct packet
-		auto toEos = gRpc::Packet::send::calling( fullySpecifiedMethod, methodData );
-
 		bool isServer = ( argc > 1 );
 #ifndef A0S_GRPC
 		LOG( "[~] must be defined A0S_GRPC" );
@@ -312,7 +312,7 @@ namespace syscross::HelloEOS { struct Main_gRpc {
 			//std::shared_ptr<Channel> grpcOverUdpChannel = gRpc::xxx::createChannel( grpcOverUdp );
 			//std::shared_ptr<Channel> grpcOverUdpChannel = gRpc::TypeIndepInterceptor::createChannel( grpcOverUdp );
 			//std::shared_ptr<Channel> grpcOverUdpChannel = gRpc::Channel::typeIndepInterceptor( grpcOverUdp );
-			std::shared_ptr<Channel> grpcOverUdpChannel = gRpc::Factory::channel( ctx );
+			std::shared_ptr<Channel> grpcOverUdpChannel = gRpc::Channel::Factory::create( ctx );
 			// Standart helloworld
 			GreeterClient greeter( grpcOverUdpChannel );
 			std::string user( "world" );
