@@ -7,18 +7,28 @@ class SendText {
 	EOS_P2P_SocketId m_sendSocketId;
 	EOS_P2P_SendPacketOptions m_options;
 
-	// tmp
+public: // tmp
+
 	// TODO(alex): base and multiple sender classes, or single SendText=SendOrdinary
-public:
 	template<typename T>
-	void sendPacket_(const T &value) {
-		Networking::messageData_t messageData( value.begin( ), value.end( ) );
-		auto dataLengthBytes = messageData.size( ) * sizeof( Networking::messageData_t::value_type );
-		m_options.DataLengthBytes = static_cast< uint32_t >( dataLengthBytes );
-		m_options.Data = messageData.data( );
-		EOS_EResult result = ::EOS_P2P_SendPacket( m_p2PHandle, &m_options );
-		if ( EOS_EResult::EOS_Success != result )
-			throw std::runtime_error( "error EOS_P2P_SendPacket" );
+	void sendPacket_(const T &messageData) {
+		const size_t maxDataLengthBytes = Networking::c_MaxDataSizeBytes;
+		auto it = messageData.begin( );
+		while ( it != messageData.end( ) ) {
+			const size_t distance = std::distance( it, messageData.end( ) );
+			const size_t dataLengthBytes = std::min( maxDataLengthBytes, distance );
+
+			// trace
+			auto str = ( std::stringstream( )<< Hexdump( std::addressof( *it ), dataLengthBytes ) ).str( );
+			LOG( "[sendPacket_] Hexdump of amout bytes: %zd\n%s", dataLengthBytes, str.c_str( ) );
+
+			m_options.DataLengthBytes = static_cast< uint32_t >( dataLengthBytes );
+			m_options.Data = std::addressof( *it );
+			EOS_EResult result = ::EOS_P2P_SendPacket( m_p2PHandle, &m_options );
+			if ( EOS_EResult::EOS_Success != result )
+				throw std::runtime_error( "error EOS_P2P_SendPacket" );
+			it += dataLengthBytes;
+		}
 	}
 
 public:

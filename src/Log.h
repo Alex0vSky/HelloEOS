@@ -1,5 +1,6 @@
 // src\Log.h - with formatting warnings, thread safe if printf/wprintf is safe, 
-// using tuple to heavy, buffer avoid multi evaluate __VA_ARGS__ values
+// using tuple to heavy, a buffer need to avoid multi evaluate __VA_ARGS__ values
+// TODO(alex): add message on cutting printed data
 // @insp SO/how-do-i-expand-a-tuple-into-variadic-template-functions-arguments
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
 #ifndef A0S_cppcheck__ // Cant pass '// cppcheck-suppress cstyleCast' to macro

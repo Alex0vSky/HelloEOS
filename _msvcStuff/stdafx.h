@@ -3,6 +3,7 @@
 // System
 #define NOMINMAX
 #include <Windows.h>
+#include <intrin.h>
 
 // Stl
 #include <iostream>

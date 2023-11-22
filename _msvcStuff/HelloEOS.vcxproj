@@ -134,11 +134,12 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <SupportJustMyCode>false</SupportJustMyCode>
+      <AdditionalOptions>/Zc:sizedDealloc- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>C:\Prj\_L\3d\EOS_SDK\SDK\Lib</AdditionalLibraryDirectories>
-      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <AdditionalOptions>/VERBOSE:INCR %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|Win32'">
@@ -247,6 +248,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\_L\net\gRpcSource\grpc-1.58.2\test\cpp\util\proto_reflection_descriptor_database.cc">
+      <ExcludedFromBuild Condition="true">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|x64'">false</ExcludedFromBuild>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|x64'">/Zc:sizedDealloc- %(AdditionalOptions)</AdditionalOptions>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|Win32'">false</ExcludedFromBuild>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|Win32'">/Zc:sizedDealloc- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\HelloEOS.cpp" />
@@ -273,10 +278,12 @@
     <ClInclude Include="..\src\Credentials\Hardcode.h" />
     <ClInclude Include="..\src\Deferred\Action.h" />
     <ClInclude Include="..\src\Deferred\ConnectionRequestListener\AcceptEveryone.h" />
+    <ClInclude Include="..\src\Deferred\ConnectionRequestListener\AcceptEveryoneConnectionAware.h" />
     <ClInclude Include="..\src\Deferred\Ctx.h" />
     <ClInclude Include="..\src\Deferred\PingPonger.h" />
     <ClInclude Include="..\src\Deferred\QueueCommands.h" />
     <ClInclude Include="..\src\Deferred\Receiver\RecvText.h" />
+    <ClInclude Include="..\src\Deferred\Receiving.h" />
     <ClInclude Include="..\src\Deferred\Sender\SendText.h" />
     <ClInclude Include="..\src\Deferred\Sending.h" />
     <ClInclude Include="..\src\gRpc\Channel\Factory.h" />
@@ -299,6 +306,7 @@
     <ClInclude Include="..\src\Synchronously\Auth.h" />
     <ClInclude Include="..\src\Synchronously\Friend.h" />
     <ClInclude Include="..\src\Synchronously\Presence.h" />
+    <ClInclude Include="..\src\Synchronously\PresenceQueryable.h" />
     <ClInclude Include="..\src\Synchronously\Receive\Bandwidth.h" />
     <ClInclude Include="..\src\Synchronously\Receive\BaseReceive.h" />
     <ClInclude Include="..\src\Synchronously\Receive\Chat.h" />
@@ -316,11 +324,14 @@
   <ItemGroup>
     <CopyFileToFolders Include="..\..\..\_L\3d\EOS_SDK\SDK\Bin\EOSSDK-Win32-Shipping.dll">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|x64'">true</ExcludedFromBuild>
     </CopyFileToFolders>
     <CopyFileToFolders Include="..\..\..\_L\3d\EOS_SDK\SDK\Bin\EOSSDK-Win64-Shipping.dll">
       <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_gRPC|Win32'">true</ExcludedFromBuild>
     </CopyFileToFolders>
     <None Include="cpp.hint" />

@@ -20,8 +20,10 @@ class QueueCommands {
 		m_platformHandle( platformHandle )
 		, m_p2PHandle( EOS_Platform_GetP2PInterface( platformHandle ) )
 	{
-		if ( nullptr == platformHandle )
-			throw std::runtime_error{ "not initialized" };
+		// TODO(alex): tmp comment
+		//if ( nullptr == platformHandle )
+		//	throw std::runtime_error{ "not initialized" };
+		LOG( "[!] QueueCommands tmp comment" );
 	}
 	QueueCommands(const QueueCommands &) = delete;
 	QueueCommands(QueueCommands &&) = delete;

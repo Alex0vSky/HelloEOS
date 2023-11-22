@@ -26,15 +26,25 @@ public:
 		Deferred::QueueCommands::instance( ).push( command );
 		return command;
 	}
-	auto vector() {
-		auto executor = std::make_shared< Receiver::RecvText >( m_ctx, m_channel );
+	auto vector(size_t len) {
+		auto executor = std::make_unique< Receiver::RecvText >( m_ctx, m_channel );
+		auto accumulator = std::make_unique< Networking::messageData_t >( );
 		auto command = detail_::make_action(
 				QueueCommands::Direction::Incoming
-				, [] (const std::shared_ptr< Receiver::RecvText > &p) { 
-					Networking::messageData_t messageData = p ->receive_( );
+				, [len] (const std::unique_ptr< Receiver::RecvText > &executor, const std::unique_ptr< Networking::messageData_t > &buf) { 
+					Networking::messageData_t messageData = executor ->receive_( len );
+					if ( !messageData.empty( ) && messageData.size( ) != len ) {
+						// accumulate
+						std::copy( messageData.begin( ), messageData.end( ),  std::back_inserter( *buf ) );
+						// until requirement size
+						if ( buf ->size( ) == len )
+							return *buf;
+						return Networking::messageData_t{ };
+					}
 					return messageData;
 				}
-				, executor 
+				, std::move( executor )
+				, std::move( accumulator )
 			);
 		Deferred::QueueCommands::instance( ).push( command );
 		return command;

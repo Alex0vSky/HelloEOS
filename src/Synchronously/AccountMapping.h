@@ -34,7 +34,10 @@ class AccountMapping {
 			LOG( "[OnQueryExternalAccountMappingsCallback] no new mappig" );
 			return;
 		}
-		auto b = ::EOS_ProductUserId_IsValid( NewMapping );
+		if ( EOS_FALSE == ::EOS_ProductUserId_IsValid( NewMapping ) ) {
+			LOG( "[OnQueryExternalAccountMappingsCallback] invalid ProductUserId" );
+			return;
+		}
 		LOG( "[OnQueryExternalAccountMappingsCallback] %s", HumanReadable::ProductUserIDToString_( NewMapping ) );
 		//ExternalAccountsMap[NextId] = NewMapping;
 		self ->m_FriendLocalUserId = NewMapping;

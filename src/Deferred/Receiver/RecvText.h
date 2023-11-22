@@ -8,7 +8,7 @@ class RecvText {
 
 	EOS_P2P_ReceivePacketOptions m_options;
 	const uint8_t m_channel = 0;
-	// retrieving the size of the next packet on any channel
+	// If NULL, we're retrieving the size of the next packet on any channel
 	const uint8_t* m_requestedChannel = &m_channel;
 
 public:
@@ -25,38 +25,28 @@ public:
 		m_options.RequestedChannel = m_requestedChannel;
 	}
 
-	// TODO(alex): dont repeat youself
-	Networking::messageData_t receive_(size_t len = 0) {
-		EOS_EResult result;
-		// truncating disallowed
-		{
-			EOS_P2P_GetNextReceivedPacketSizeOptions Options = { EOS_P2P_GETNEXTRECEIVEDPACKETSIZE_API_LATEST };
-			Options.LocalUserId = m_ctx.m_LocalUserId;
-			Options.RequestedChannel = m_requestedChannel;
-			uint32_t outPacketSizeBytes = 0;
-			result = ::EOS_P2P_GetNextReceivedPacketSize( m_p2PHandle, &Options, &outPacketSizeBytes );
-			if ( EOS_EResult::EOS_NotFound == result ) 
-				return { };
-			if ( EOS_EResult::EOS_Success != result ) 
-				throw std::runtime_error( "error EOS_P2P_GetNextReceivedPacketSize" );
-			if ( len && len != outPacketSizeBytes ) 
-				throw std::runtime_error( "lenght mismatch" );
-		}
+	// TODO(alex): base and multiple sender classes, or single SendText=SendOrdinary
+	Networking::messageData_t receive_(size_t len) {
 		EOS_ProductUserId unused_;
 		Networking::messageData_t messageData( m_options.MaxDataSizeBytes );
 		uint32_t bytesWritten = 0;
-		uint8_t channel = 0;
-		result = ::EOS_P2P_ReceivePacket( m_p2PHandle, &m_options
-			, &unused_, &m_receiveSocketId, &channel, messageData.data( ), &bytesWritten );
+		uint8_t outChannel = 0;
+		EOS_EResult result = ::EOS_P2P_ReceivePacket( m_p2PHandle, &m_options
+			, &unused_, &m_receiveSocketId, &outChannel, messageData.data( ), &bytesWritten );
 		if ( EOS_EResult::EOS_NotFound == result ) 
 			return { };
 		if ( EOS_EResult::EOS_Success != result ) 
 			throw std::runtime_error( "error EOS_P2P_ReceivePacket" );
-		// tmp
-		if ( m_channel != channel ) 
+		if ( m_channel != outChannel ) 
 			throw std::runtime_error( "channel mismatch" );
-		//LOG( "[RecvText] bytesWritten: %d", bytesWritten );
+
+		//LOG( "[receive_] bytesWritten: %d", bytesWritten );
 		messageData.resize( bytesWritten );
+
+		// trace
+		auto str = ( std::stringstream( )<< Hexdump( messageData.data( ), messageData.size( ) ) ).str( );
+		LOG( "[receive_] Hexdump of amout bytes: %zd\n%s", bytesWritten, str.c_str( ) );
+
 		return messageData;
 	}
 };

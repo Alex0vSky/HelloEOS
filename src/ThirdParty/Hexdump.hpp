@@ -19,7 +19,7 @@ template <unsigned RowSize, bool ShowAscii>
 std::ostream& operator<<(std::ostream& out, const CustomHexdump<RowSize, ShowAscii>& dump)
 {
     out.fill('0');
-    for (int i = 0; i < dump.mLength; i += RowSize)
+    for (unsigned int i = 0; i < dump.mLength; i += RowSize)
     {
         out << "0x" << std::setw(6) << std::hex << i << ": ";
         for (int j = 0; j < RowSize; ++j)

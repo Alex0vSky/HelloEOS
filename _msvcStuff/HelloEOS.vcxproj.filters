@@ -191,6 +191,15 @@
     <ClInclude Include="..\src\gRpc\Channel\Factory.h">
       <Filter>Header Files\gRpc\Channel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Deferred\Receiving.h">
+      <Filter>Header Files\Deferred</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Deferred\ConnectionRequestListener\AcceptEveryoneConnectionAware.h">
+      <Filter>Header Files\Deferred</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Synchronously\PresenceQueryable.h">
+      <Filter>Header Files\Synchronously</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resource\HelloEOS.rc">

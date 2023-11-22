@@ -27,8 +27,10 @@
 #include "Synchronously/Friend.h"
 #include "Synchronously/AccountMapping.h"
 #include "Synchronously/Presence.h"
+#include "Synchronously/PresenceQueryable.h"
 #include "Deferred/Ctx.h"
 #include "Deferred/ConnectionRequestListener/AcceptEveryone.h"
+#include "Deferred/ConnectionRequestListener/AcceptEveryoneConnectionAware.h"
 #include "Deferred/QueueCommands.h"
 #include "Deferred/Action.h"
 #include "Deferred/Sender/SendText.h"
@@ -67,7 +69,7 @@ namespace syscross::HelloEOS { struct MainDeferred {
 			return;
 		LOG( "[~] mapping.getFriendLocalUserId( ) valid: %s", ( ::EOS_ProductUserId_IsValid( mapping.getFriendLocalUserId( ) ) ?"TRUE" :"FALSE" ) );
 
-		Synchronously::Presence presence( platformHandle, auth.getAccount( ) );
+		Synchronously::PresenceQueryable presence( platformHandle, auth.getAccount( ) );
 		if ( !presence.setOnlineAndTitle( ) )
 			return;
 
@@ -79,10 +81,13 @@ namespace syscross::HelloEOS { struct MainDeferred {
 
 		Deferred::QueueCommands::init( platformHandle );
 		Deferred::Ctx ctx{ "CHAT", auth.getLocalUserId( ), platformHandle, mapping.getFriendLocalUserId( ) };
-		Deferred::ConnectionRequestListener::AcceptEveryone acceptEveryone( ctx );
-		uint8_t channelReceiving = 1;
-		uint8_t channelSending = 2;
-		std::chrono::milliseconds sleep{ 100 };
+		Deferred::ConnectionRequestListener::AcceptEveryoneConnectionAware acceptEveryone( ctx );
+		const uint8_t channelReceiving = 1;
+		const uint8_t channelSending = 2;
+		const uint8_t channelCommon = 3;
+		const std::chrono::milliseconds sleep{ 100 };
+		const size_t vectorSize = ( EOS_P2P_MAX_PACKET_SIZE + 1 );
+
 		if ( isServer ) {
 			LOG( "[~] server" );
 ////			Deferred::Receiving receiving( ctx, acceptEveryone );
@@ -107,9 +112,25 @@ namespace syscross::HelloEOS { struct MainDeferred {
 //				LOG( "[~] sleep" );
 //				std::this_thread::sleep_for( sleep );
 //			}
+//
+//			Deferred::PingPonger pingPonger( ctx );
+//			pingPonger.infinitePonger( );
 
-			Deferred::PingPonger pingPonger( ctx );
-			pingPonger.infinitePonger( );
+			Deferred::Receiving receiving( ctx, channelCommon, acceptEveryone );
+			receiving.vector( vectorSize );
+			auto incomingData = Deferred::QueueCommands::instance( ).ticksAll( );
+			const auto &packet = incomingData[ 0 ];
+			LOG( "[>>%zd] vector", packet.size( ) );
+			size_t i = 0;
+			for ( ; i < packet.size( ); ++i ) {
+				auto value = static_cast< Networking::messageData_t::value_type >( i );
+				// Simple sequence checking
+				if ( packet[ i ] != value ) {
+					LOG( "[~] wrong, 'i' is %zd, but to be %zd", i, value );
+					break;
+				}
+			}
+			LOG( "[~] checking: %s", ( ( i >= packet.size( ) ) ?"true" :"false" ) );
 
 		} else {
 			LOG( "[~] client" );
@@ -134,17 +155,54 @@ namespace syscross::HelloEOS { struct MainDeferred {
 //				LOG( "[~] sleep" );
 //				std::this_thread::sleep_for( sleep );
 //			}
+//
+//			std::chrono::seconds sleep{ 1 };
+//			Deferred::PingPonger pingPonger( ctx );
+//			LOG( "[~] press [Ctrl+C] to exit" );
+//			while( true ) {
+//				auto milli = pingPonger.pingerMeasure( );
+//				LOG( "Reply from 'Epic-provided relay': bytes=4, time=%lldms", milli.count( ) );
+//				std::this_thread::sleep_for( sleep );
+//			}
 
-			std::chrono::seconds sleep{ 1 };
-			Deferred::PingPonger pingPonger( ctx );
-			LOG( "[~] press [Ctrl+C] to exit" );
-			while( true ) {
-				auto milli = pingPonger.pingerMeasure( );
-				LOG( "Reply from 'Epic-provided relay': bytes=4, time=%lldms", milli.count( ) );
-				std::this_thread::sleep_for( sleep );
+			LOG( "[~] wait server..." );
+			// +TODO(alex): presence
+			//	[LogEOSPresence] Received presence update. LocalUserId=[34c...827] PresenceUserId=[fbd...fb1] RichText=[Using P2P NAT]
+			const EOS_Presence_EStatus statusInitial = static_cast< EOS_Presence_EStatus >( -1 );
+			EOS_Presence_EStatus statusPrev = statusInitial;
+			EOS_Presence_EStatus statusCur = statusInitial;
+			while ( true ) {
+				statusPrev = statusCur;
+				if ( !presence.query( allFriends[ 0 ].UserId, &statusCur ) )
+					return;
+				__nop( );
+				if ( statusInitial != statusPrev && statusPrev != statusCur ) {
+					LOG( "[~] server status changed" );
+				}
+				if ( statusCur == EOS_Presence_EStatus::EOS_PS_Online )  {
+					bool isEstablished = acceptEveryone.isEstablished( ); // only after first data exchange
+					LOG( "[~] server is online" );
+					Deferred::Sending sending( ctx, channelCommon );
+					Networking::messageData_t vector( vectorSize );
+					for ( size_t i = 0; i < vector.size( ); ++i ) {
+						auto value = static_cast< Networking::messageData_t::value_type >( i );
+						vector[ i ] = value;
+					}
+					sending.vector( vector );
+					LOG( "[<<%zd] vector", vector.size( ) );
+					Deferred::QueueCommands::instance( ).ticksAll( );
+					
+					// TODO(alex): LOG( "[~] press [Enter] to break sleep right now" ); // breakableSleep
+					LOG( "[~] sleep to other iteration..." );
+					std::this_thread::sleep_for( std::chrono::seconds{ 60 } );
+					continue;
+				}
+				//LOG( "[~] tick" );
+				::EOS_Platform_Tick( platformHandle );
+				std::this_thread::sleep_for( std::chrono::seconds{ 1 } );
 			}
 		}
-		LOG( "[~] press any key to exit" );
+		LOG( "[~] press [Enter] to exit" );
 		getchar( );
 		return;
 	}

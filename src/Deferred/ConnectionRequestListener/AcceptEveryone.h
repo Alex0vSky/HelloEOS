@@ -1,14 +1,19 @@
 // src\Deferred\ConnectionRequestListener\AcceptEveryone.h - 
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
 namespace syscross::HelloEOS::Deferred::ConnectionRequestListener {
+// TODO(alex): to separate file
 class BaseAcceptor {
 };
 class AcceptEveryone : public BaseAcceptor {
-	EOS_ProductUserId m_LocalUserId;
 	const std::string m_SocketName;
+	EOS_NotificationId m_notificationIdConnectionRequest = EOS_INVALID_NOTIFICATIONID;
+
+protected:
 	EOS_HP2P m_p2PHandle;
+	EOS_ProductUserId m_LocalUserId;
 	EOS_P2P_SocketId m_SocketId;
-	EOS_NotificationId m_notificationId;
+
+private:
 	// TODO(alex): dont repeat youself
 	static void EOS_CALL OnIncomingConnectionRequest_(const EOS_P2P_OnIncomingConnectionRequestInfo* Data) {
 		if ( !Data )
@@ -36,19 +41,22 @@ public:
 	{
 		strcpy_s( m_SocketId.SocketName , m_SocketName.c_str( ) );
 
-		EOS_P2P_AddNotifyPeerConnectionRequestOptions options = { };
-		options.ApiVersion = EOS_P2P_ADDNOTIFYPEERCONNECTIONREQUEST_API_LATEST;
-		options.LocalUserId = m_LocalUserId;
-		options.SocketId = &m_SocketId;
+		{
+			::EOS_P2P_AddNotifyPeerConnectionRequestOptions options = { EOS_P2P_ADDNOTIFYPEERCONNECTIONREQUEST_API_LATEST };
+			options.LocalUserId = m_LocalUserId;
+			options.SocketId = &m_SocketId;
 
-		m_notificationId = ::EOS_P2P_AddNotifyPeerConnectionRequest(
-			m_p2PHandle, &options, this, OnIncomingConnectionRequest_ );
-		if ( m_notificationId == EOS_INVALID_NOTIFICATIONID ) 
-			throw std::runtime_error( "error EOS_P2P_AddNotifyPeerConnectionRequest");
+			m_notificationIdConnectionRequest = ::EOS_P2P_AddNotifyPeerConnectionRequest(
+				m_p2PHandle, &options, this, OnIncomingConnectionRequest_ );
+			// TODO(alex): tmp comment
+			//if ( m_notificationIdConnectionRequest == EOS_INVALID_NOTIFICATIONID ) 
+			//	throw std::runtime_error( "error EOS_P2P_AddNotifyPeerConnectionRequest");
+			LOG( "[!] AcceptEveryone tmp comment" );
+		}
 	}
 	~AcceptEveryone() {
 		// Could be [LogEOSP2P] Successfully closed last connection request listener for this socket...
-		::EOS_P2P_RemoveNotifyPeerConnectionRequest( m_p2PHandle, m_notificationId );
+		::EOS_P2P_RemoveNotifyPeerConnectionRequest( m_p2PHandle, m_notificationIdConnectionRequest );
 	}
 };
 } // namespace syscross::HelloEOS::Deferred::ConnectionRequestListener

@@ -10,7 +10,7 @@ struct HumanReadable {
 
 		static char TempBuffer[EOS_EPICACCOUNTID_MAX_LENGTH + 1];
 		int32_t TempBufferSize = sizeof(TempBuffer);
-		EOS_EResult Result = EOS_EpicAccountId_ToString(InAccountId, TempBuffer, &TempBufferSize);
+		EOS_EResult Result = ::EOS_EpicAccountId_ToString(InAccountId, TempBuffer, &TempBufferSize);
 
 		if (Result == EOS_EResult::EOS_Success)
 		{
@@ -30,7 +30,7 @@ struct HumanReadable {
 
 		static char TempBuffer[EOS_EPICACCOUNTID_MAX_LENGTH + 1];
 		int32_t TempBufferSize = sizeof(TempBuffer);
-		EOS_EResult Result = EOS_ProductUserId_ToString( AccountId, TempBuffer, &TempBufferSize);
+		EOS_EResult Result = ::EOS_ProductUserId_ToString( AccountId, TempBuffer, &TempBufferSize);
 
 		if (Result == EOS_EResult::EOS_Success)
 		{
