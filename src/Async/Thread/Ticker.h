@@ -1,111 +1,76 @@
 // src\Async\Thread\Ticker.h - 
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
-namespace syscross::HelloEOS::Async::Thread {
-class Ticker {
-	eos_t m_prepared;
-	std::atomic_bool m_bPrepared = false;
-	multiplex_t m_multiplex;
+namespace syscross::HelloEOS::Async::Thread { class Ticker {
+	friend struct FactoryInfiniteWaiting;
+	const bool m_isServer;
+	std::atomic_bool m_bPrepared = false, m_bError = false;
+	//PrepareEos::prepared_t m_oes;
+	//std::unique_ptr< Async::Context > m_ctx;
+	//multiplex_t m_multiplexer;
+	//Executor m_executor;
+	////static constexpr auto asd = std::literals::chrono_literals::operator"" s;
+	struct SuperclassTicker {
+		multiplex_t m_multiplexer;
+		Async::Context m_ctx;
+		Executor m_executor;
+		PrepareEos::prepared_t m_oes;
+		// TODO(alex): makeme and test client-server
+		//Deferred::ConnectionRequestListener::AcceptEveryoneConnectionAware m_acceptor;
+		typedef std::unique_ptr< SuperclassTicker > inner_t;
+		SuperclassTicker(PrepareEos::prepared_t const& oes) :
+			m_multiplexer( std::make_shared< Multiplexer >( ) )
+			, m_ctx{ oes ->m_platformHandle, "", oes ->m_auth ->getLocalUserId( ), oes ->m_mapping ->getFriendLocalUserId( ) }
+			, m_executor( m_multiplexer, m_ctx )
+			, m_oes( oes )
+			//, m_acceptor( m_ctx )
+		{}
+	};
+	SuperclassTicker::inner_t m_inner;
 
+protected:
 	std::atomic_bool m_bStop = false;
-	std::thread m_thread;
-	// +TODO(alex): its demultiplexer???
-// In computing, I/O multiplexing can also be used to refer to the concept of processing multiple input/output events from a single event loop, with system calls like poll[1] and select (Unix).[2]
-// https://habr.com/ru/companies/lineate/articles/585050/
-// https://habr.com/ru/companies/lineate/articles/674144/
-
-	//ContextFactory m_contextFactory;
 	void run_() {
-#ifdef _DEBUG
-		::SetThreadDescription( ::GetCurrentThread( ), L"MainGameThread" );
-#endif
-		// +TODO(alex): move preparing EOS to here
-		auto prepared = Async::PrepareEos::ordinary( m_startup.m_isServer );
-		if ( !prepared ) 
-			return;
-		m_prepared = std::make_shared< PrepareEos::Prepared >( std::move( prepared.value( ) ) );
-		//m_contextFactory = ContextFactory( m_prepared );
+		A0S_SetThreadName( "MainGameThread" );
+		auto m_oes = Async::PrepareEos::ordinary( m_isServer );
+		if ( !m_oes )
+			return m_bError = true, (void)0;
+		// TODO(alex): on this stage is better to create subclass, for example `Executor m_executor` not completely ready for working
+		// "object is potentially in an undefined state"
+		// to ommit init can place in `union` @insp https://stackoverflow.com/questions/2464296/is-it-possible-to-defer-member-initialization-to-the-constructor-body
+		// can move this members to another class
+		// `PrepareEos::prepared_t m_oes;`
+		// `std::unique_ptr< Async::Context > m_ctx;`
+		// `multiplex_t m_multiplexer;`
+		// `Executor m_executor;`
+		m_inner = SuperclassTicker::inner_t( new SuperclassTicker( m_oes ) );
+		// ugly, but need only this thread for init and working
 		m_bPrepared = true;
-		// TODO(alex): auto future = std::async( task1 ); https://akrzemi1.wordpress.com/2011/09/21/destructors-that-throw/
+		//m_ctx = std::unique_ptr< Async::Context >( new Async::Context{
+		//			m_oes ->m_platformHandle
+		//			, ""
+		//			, m_oes ->m_auth ->getLocalUserId( )
+		//			, m_oes ->m_mapping ->getFriendLocalUserId( )
+		//		} );
 		while ( !m_bStop ) {
-			std::this_thread::sleep_for( std::chrono::milliseconds{ 300 } );
-			//m_startup.ctx.processAll( );
-			auto task = m_multiplex ->pop( );
-			if ( task ) {
-				task.value( )( );
-			}
-			::EOS_Platform_Tick( m_prepared ->m_platformHandle );
+			std::this_thread::sleep_for( 300ms );
+			//m_executor.processAll( );
+			m_inner ->m_executor.processAll( );
 		}
 	}
-	struct Startup {
-		const bool m_isServer;
-	} m_startup;
-
-	bool z; explicit Ticker(Startup const& startup) : z( false )
-		 , m_startup( startup )
-		 , m_multiplex( std::make_shared< Multiplex >( ) )
-		 //, m_contextFactory( nullptr )
-	{
-		m_thread = std::thread{ &Ticker::run_, this };
-	}
+	explicit Ticker(bool isServer) : 
+		 m_isServer( isServer )
+		//, m_multiplexer( std::make_shared< Multiplexer >( ) )
+		//, m_executor( m_multiplexer )
+	{}
 
 public: 
-	~Ticker() {
-		Ticker::m_bStop = true, m_thread.join( ); // C++20 std::jthread?
+	Async::Send createSender(std::string const& m_socketName) const {
+		// TODO(alex): ??? what about Factory?
+		if ( !m_bPrepared )
+			throw std::runtime_error( "undefined state object" );
+		Async::Context ctx  = this ->m_inner ->m_ctx;
+		const_cast< std::string & >( ctx.m_socketName ) = m_socketName;
+		return Async::Send( ctx, this ->m_inner ->m_multiplexer );
 	}
-	typedef std::unique_ptr< class Ticker > ticker_t;
-	static ticker_t createTicker(Startup const& startup) {
-		auto ticker = ticker_t( new Ticker( startup ) );
-		while ( !ticker ->m_bPrepared )
-			std::this_thread::yield( );
-		return ticker;
-	}
-
-	//// poc
-	//class Factory {
-	//	Ticker *m_ticker;
-	//	std::string m_socketName;
-	//public:
-	//	Factory(Ticker *ticker, std::string const& socketName) :
-	//		m_ticker( ticker ) 
-	//		, m_socketName( socketName ) 
-	//	{
-	//		std::cout << "Factory\n";
-	//	}
-	//	Async::Send createSender() {
-	//		//return Async::Send({ m_ticker ->m _prepared.m_platformHandle
-	//		//		, m_socketName
-	//		//		, m_ticker ->m _prepared.m_auth ->getLocalUserId( )
-	//		//		, m_ticker ->m _prepared.m_mapping ->getFriendLocalUserId( )
-	//		//	});
-	//		//return Async::Send( m_ticker ->g etContext( m_socketName ), m_ticker );
-	//		return Async::Send( m_ticker ->g etContext( m_socketName ), m_ticker ->m_multiplex );
-	//	}
-	//	// chain usage only
-	//	Factory(Factory&&) = delete;
-	//	//Factory(const Factory&) = delete;
-	//	//Factory& operator=(Factory&&) = delete;
-	//	//Factory& operator=(const Factory&) = delete;
-	//};
-//#pragma warning( push )
-//#pragma warning( disable: 4172 )
-//	auto &&getFactory(std::string const& m_socketName) {
-//		return Factory{ this, m_socketName };
-//	}
-//#pragma warning( pop )	
-	Async::Send createSender(std::string const& m_socketName) {
-		// -TODO(alex): doing req waitEos() mandatory or reuse thread in factory::createTicker() and run()
-		//waitEos( );
-		//return Async::Send( m_contextFactory.getContext( m_socketName ), this ->m_multiplex );
-		return Async::Send( 
-				Async::Context{
-					m_prepared ->m_platformHandle
-					, m_socketName
-					, m_prepared ->m_auth ->getLocalUserId( )
-					, m_prepared ->m_mapping ->getFriendLocalUserId( )
-				}
-				, this ->m_multiplex 
-			);
-	}
-
 };
 } // namespace syscross::HelloEOS::Async::Thread

@@ -10,8 +10,8 @@ struct PrepareEos {
 		std::unique_ptr< Synchronously::AccountMapping > m_mapping;
 		std::unique_ptr< Synchronously::PresenceQueryable > m_presence;
 	};
-	static 
-	std::optional< Prepared > ordinary(bool isServer) {
+	typedef std::shared_ptr< PrepareEos::Prepared > prepared_t;
+	static prepared_t ordinary(bool isServer) {
 		auto init = std::make_unique< InitializeEOS >( );
 		EOS_HPlatform platformHandle = init ->initialize( );
 		if ( !platformHandle )
@@ -43,14 +43,14 @@ struct PrepareEos {
 			( platformHandle, auth ->getAccount( ) );
 		if ( !presence ->setOnlineAndTitle( ) )
 			return { };
-		return Prepared {
+		return prepared_t( new PrepareEos::Prepared {
 				platformHandle
 				, std::move( init )
 				, std::move( auth )
 				, std::move( friends )
 				, std::move( mapping )
 				, std::move( presence )
-			};
+			} );
 	}
 };
 } // namespace syscross::HelloEOS::Async

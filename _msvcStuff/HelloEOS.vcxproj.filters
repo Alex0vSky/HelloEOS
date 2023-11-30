@@ -221,8 +221,17 @@
     <ClInclude Include="..\src\Async\PrepareEos.h">
       <Filter>Header Files\Async</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Async\Thread\Factory.h">
+      <Filter>Header Files\Async\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\IMultiplex.h">
+      <Filter>Header Files\Async</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\Async\Thread\JThread.h">
       <Filter>Header Files\Async\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\Multiplexer.h">
+      <Filter>Header Files\Async</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

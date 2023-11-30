@@ -275,9 +275,12 @@
     <ClInclude Include="..\src\Anchronously\Ping.h" />
     <ClInclude Include="..\src\Anchronously\Receive\Chat.h" />
     <ClInclude Include="..\src\Anchronously\Send\Chat.h" />
+    <ClInclude Include="..\src\Async\IMultiplex.h" />
+    <ClInclude Include="..\src\Async\Multiplexer.h" />
     <ClInclude Include="..\src\Async\SuperClass.h" />
     <ClInclude Include="..\src\Async\PrepareEos.h" />
     <ClInclude Include="..\src\Async\Send.h" />
+    <ClInclude Include="..\src\Async\Thread\Factory.h" />
     <ClInclude Include="..\src\Async\Thread\JThread.h" />
     <ClInclude Include="..\src\Async\Thread\Ticker.h" />
     <ClInclude Include="..\src\Credentials\Hardcode.h" />
