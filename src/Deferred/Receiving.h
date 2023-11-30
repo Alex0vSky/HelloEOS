@@ -7,7 +7,7 @@ class Receiving {
 
 public:
 	// For recv need to have instance of Acceptor
-	Receiving(Ctx ctx, uint8_t channel, const ConnectionRequestListener::BaseAcceptor &) : 
+	Receiving(const Ctx &ctx, uint8_t channel, const ConnectionRequestListener::BaseAcceptor &) : 
 		m_ctx( ctx )
 		, m_channel( channel )
 	{}
@@ -18,12 +18,12 @@ public:
 		auto command = detail_::make_action(
 				QueueCommands::Direction::Incoming
 				, [len] (const std::shared_ptr< Receiver::RecvText > &p) { 
-					Networking::messageData_t messageData = p ->receive_( len );
+					Networking::messageData_t messageData = p ->receive_( );
 					return messageData;
 				}
 				, executor 
 			);
-		Deferred::QueueCommands::instance( ).push( command );
+		QueueCommands::instance( ).push( command );
 		return command;
 	}
 	auto vector(size_t len) {
@@ -32,7 +32,7 @@ public:
 		auto command = detail_::make_action(
 				QueueCommands::Direction::Incoming
 				, [len] (const std::unique_ptr< Receiver::RecvText > &executor, const std::unique_ptr< Networking::messageData_t > &buf) { 
-					Networking::messageData_t messageData = executor ->receive_( len );
+					Networking::messageData_t messageData = executor ->receive_( );
 					if ( !messageData.empty( ) && messageData.size( ) != len ) {
 						// accumulate
 						std::copy( messageData.begin( ), messageData.end( ),  std::back_inserter( *buf ) );
@@ -46,7 +46,7 @@ public:
 				, std::move( executor )
 				, std::move( accumulator )
 			);
-		Deferred::QueueCommands::instance( ).push( command );
+		QueueCommands::instance( ).push( command );
 		return command;
 	}
 };

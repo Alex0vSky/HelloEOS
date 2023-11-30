@@ -30,7 +30,7 @@ public:
 	) override {
 		Networking::messageData_t messageData = std::apply( m_function, m_args );
 		if ( !avoidPush.Yes )
-			Deferred::QueueCommands::instance( ).push( shared_from_this( ) );
+			QueueCommands::instance( ).push( shared_from_this( ) );
 		return messageData;
 	}
 	QueueCommands::Direction getDirection() const override {

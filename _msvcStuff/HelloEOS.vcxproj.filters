@@ -40,6 +40,12 @@
     <Filter Include="Header Files\gRpc\Channel">
       <UniqueIdentifier>{45abbcec-730e-42a7-8b80-879cbdc4332b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Async">
+      <UniqueIdentifier>{557e2ccc-ead3-449d-94b5-74999ea4c33a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Async\Thread">
+      <UniqueIdentifier>{92c86e98-6244-4f26-8f32-836e865c3832}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -199,6 +205,24 @@
     </ClInclude>
     <ClInclude Include="..\src\Synchronously\PresenceQueryable.h">
       <Filter>Header Files\Synchronously</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MainAsynchronously.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\Thread\Ticker.h">
+      <Filter>Header Files\Async\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\Send.h">
+      <Filter>Header Files\Async</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\SuperClass.h">
+      <Filter>Header Files\Async</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\PrepareEos.h">
+      <Filter>Header Files\Async</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\Thread\JThread.h">
+      <Filter>Header Files\Async\Thread</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -39,9 +39,37 @@
 #include "Deferred/Receiving.h"
 #include "Deferred/PingPonger.h"
 
+using namespace std;
+
+struct B;
+struct M {
+	explicit M(B *) 
+	{ cout << "M" << endl; }
+    ~M(){ cout << "~M" << endl; }
+};
+
+struct B {
+	explicit B(int) 
+	{ cout << "B" << endl; }
+    ~B(){ cout << "~B" << endl; }
+};
+
+struct D : public B {
+    D() :
+		m( this )
+		, B( 1 )
+	{ cout << "D" << endl; }
+    ~D(){ cout << "~D" << endl; }
+    M m;
+};
+
 namespace syscross::HelloEOS { struct MainDeferred {
 	void run(int argc) {
 		bool isServer = ( argc > 1 );
+		D * d = new D;
+		delete(d);
+		__nop( );
+		std::cout << "asd" << endl;
 
 #pragma region prepare
 		InitializeEOS init;
@@ -131,7 +159,7 @@ namespace syscross::HelloEOS { struct MainDeferred {
 				}
 			}
 			LOG( "[~] checking: %s", ( ( i >= packet.size( ) ) ?"true" :"false" ) );
-
+			
 		} else {
 			LOG( "[~] client" );
 ////			Deferred::Sending sending( ctx );
@@ -181,6 +209,7 @@ namespace syscross::HelloEOS { struct MainDeferred {
 				}
 				if ( statusCur == EOS_Presence_EStatus::EOS_PS_Online )  {
 					bool isEstablished = acceptEveryone.isEstablished( ); // only after first data exchange
+					(void)isEstablished;
 					LOG( "[~] server is online" );
 					Deferred::Sending sending( ctx, channelCommon );
 					Networking::messageData_t vector( vectorSize );

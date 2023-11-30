@@ -3,20 +3,24 @@
 // TODO(alex): add message on cutting printed data
 // @insp SO/how-do-i-expand-a-tuple-into-variadic-template-functions-arguments
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
+//#pragma warning( push )
 #ifndef A0S_cppcheck__ // Cant pass '// cppcheck-suppress cstyleCast' to macro
 #	define LOG(fmt, ...) \
 		do {																						\
+__pragma( warning( push ) )																			\
+__pragma( warning( disable: 4906 ) )																\
+__pragma( warning( disable: 4774 ) )																\
 			using namespace std::chrono;															\
 			constexpr bool bWchar = std::is_convertible_v< decltype( fmt ), const wchar_t * >;		\
 			constexpr bool bChar = std::is_convertible_v< decltype( fmt ), const char * >;			\
 			static_assert( bWchar || bChar, "Print only wchar_t or char strings");					\
-			auto now = system_clock::now( );														\
-			auto ms = duration_cast<milliseconds>(now.time_since_epoch()) % 1000;					\
-			auto timer = system_clock::to_time_t(now);												\
-			std::tm bt; localtime_s(&bt, &timer);													\
+			auto A0S_LOG_now = system_clock::now( );												\
+			auto A0S_LOG_ms = duration_cast<milliseconds>(A0S_LOG_now.time_since_epoch()) % 1000;	\
+			auto A0S_LOG_timer = system_clock::to_time_t(A0S_LOG_now);								\
+			std::tm A0S_LOG_bt; localtime_s(&A0S_LOG_bt, &A0S_LOG_timer);							\
 			std::ostringstream ossA;																\
-			ossA << std::put_time(&bt, "%T");														\
-			ossA << '.' << std::setfill('0') << std::setw(3) << ms.count() << " | ";				\
+			ossA << std::put_time(&A0S_LOG_bt, "%T");												\
+			ossA << '.' << std::setfill('0') << std::setw(3) << A0S_LOG_ms.count() << " | ";		\
 			std::string dateTimeA = ossA.str( );													\
 			std::wstring dateTimeW( dateTimeA.begin(), dateTimeA.end() );							\
 			char bufA[ 1024 + 1 ] = { };															\
@@ -26,16 +30,17 @@
 					snprintf( bufA, 1024, (const char *)( fmt ), __VA_ARGS__ )						\
 					, dateTimeA += bufA																\
 					, dateTimeA += "\n"																\
-					, printf( dateTimeA.c_str( ) )													\
+					, printf( "%s", dateTimeA.c_str( ) )											\
 					, (void)0																		\
 					)																				\
 				: (																					\
 					_snwprintf_s( bufW, 1024, (const wchar_t *)( fmt ), __VA_ARGS__ )				\
 					, dateTimeW += bufW																\
 					, dateTimeW += L"\n"															\
-					, wprintf( dateTimeW.c_str( ) )													\
+					, wprintf( L"%s", dateTimeW.c_str( ) )											\
 					, (void)0																		\
 					)																				\
 				;																					\
+__pragma( warning( pop ) )																			\
 		} while( false )
 #endif // A0S_cppcheck__

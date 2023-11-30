@@ -6,7 +6,7 @@ class Sending {
 	uint8_t m_channel;
 
 public:
-	Sending(Ctx ctx, uint8_t channel) : 
+	Sending(const Ctx &ctx, uint8_t channel) : 
 		m_ctx( ctx )
 		, m_channel( channel )
 	{}
@@ -20,7 +20,7 @@ public:
 				}
 				, executor 
 			);
-		Deferred::QueueCommands::instance( ).push( command );
+		QueueCommands::instance( ).push( command );
 		return command;
 	}
 	auto vector(const Networking::messageData_t &vector) {
@@ -33,7 +33,7 @@ public:
 				}
 				, executor 
 			);
-		Deferred::QueueCommands::instance( ).push( command );
+		QueueCommands::instance( ).push( command );
 		return command;
 	}
 };

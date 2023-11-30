@@ -126,7 +126,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalIncludeDirectories>src;..\_msvcStuff;..\src;..\resource;C:\Prj\_L\3d\EOS_SDK\SDK\Include</AdditionalIncludeDirectories>
@@ -275,6 +275,11 @@
     <ClInclude Include="..\src\Anchronously\Ping.h" />
     <ClInclude Include="..\src\Anchronously\Receive\Chat.h" />
     <ClInclude Include="..\src\Anchronously\Send\Chat.h" />
+    <ClInclude Include="..\src\Async\SuperClass.h" />
+    <ClInclude Include="..\src\Async\PrepareEos.h" />
+    <ClInclude Include="..\src\Async\Send.h" />
+    <ClInclude Include="..\src\Async\Thread\JThread.h" />
+    <ClInclude Include="..\src\Async\Thread\Ticker.h" />
     <ClInclude Include="..\src\Credentials\Hardcode.h" />
     <ClInclude Include="..\src\Deferred\Action.h" />
     <ClInclude Include="..\src\Deferred\ConnectionRequestListener\AcceptEveryone.h" />
@@ -298,6 +303,7 @@
     <ClInclude Include="..\src\InitializeEOS.h" />
     <ClInclude Include="..\src\Log.h" />
     <ClInclude Include="..\src\MainAnchronously.h" />
+    <ClInclude Include="..\src\MainAsynchronously.h" />
     <ClInclude Include="..\src\MainDeferred.h" />
     <ClInclude Include="..\src\MainSynchronously.h" />
     <ClInclude Include="..\src\Main_gRpc.h" />

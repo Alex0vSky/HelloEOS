@@ -1,4 +1,4 @@
-// src\Deferred\QueueCommands.h - better then shared_ptr passing
+// src\Deferred\QueueCommands.h - better then shared_ptr passing everywhere
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
 namespace syscross::HelloEOS::Deferred {
 namespace detail_ { template <typename F, typename... Ts> class Action; } // namespace detail_
@@ -10,7 +10,7 @@ class QueueCommands {
 	EOS_HPlatform m_platformHandle;
 	EOS_HP2P m_p2PHandle;
 	EOS_P2P_GetPacketQueueInfoOptions m_queueVer = { EOS_P2P_GETPACKETQUEUEINFO_API_LATEST };
-	// Shortcat
+	// Shortcut
 	uint64_t m_IncomingSize = 0;
 	uint64_t m_OutgoingSize = 0;
 	// Only for friends
@@ -127,7 +127,8 @@ public:
 					tick( );
 					getQueueInfo( );
 					std::this_thread::sleep_for( c_sleep );
-				} while ( isContinuation = now( ) < timeout );
+					isContinuation = ( now( ) < timeout );
+				} while ( isContinuation );
 				allIncomingData.push_back( packet );
 			}
 			if ( isContinuation )

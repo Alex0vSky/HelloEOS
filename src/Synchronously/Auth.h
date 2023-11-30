@@ -72,6 +72,7 @@ public:
 			//if ( !acc )
 			//	continue;
 			//status = ::EOS_Auth_GetLoginStatus( AuthHandle, acc ); //} while ( EOS_ELoginStatus::EOS_LS_LoggedIn != status && !m_bError);
+			(void)status;
 		} while ( !m_bSuccess && !m_bError );
 		if ( m_bError ) 
 			return false;

@@ -35,11 +35,10 @@ public:
 		, m_epicAccountId( epicAccountId )
 	{}
 
-	bool setOnlineAndTitle(bool doTick = true) {
+	bool setOnlineAndTitle(const std::string &RichText = "Using P2P NAT", bool doTick = true) {
 		m_bPresence = false;
 		m_bError = false;
 		EOS_EResult Result;
-		std::string RichText = "Using P2P NAT";
 		EOS_Presence_CreatePresenceModificationOptions CreateModOpt = { };
 		CreateModOpt.ApiVersion = EOS_PRESENCE_CREATEPRESENCEMODIFICATION_API_LATEST;
 		CreateModOpt.LocalUserId = m_epicAccountId;

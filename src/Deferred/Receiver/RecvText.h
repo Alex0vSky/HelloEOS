@@ -26,7 +26,7 @@ public:
 	}
 
 	// TODO(alex): base and multiple sender classes, or single SendText=SendOrdinary
-	Networking::messageData_t receive_(size_t len) {
+	Networking::messageData_t receive_() {
 		EOS_ProductUserId unused_;
 		Networking::messageData_t messageData( m_options.MaxDataSizeBytes );
 		uint32_t bytesWritten = 0;
