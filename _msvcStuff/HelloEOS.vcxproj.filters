@@ -46,6 +46,9 @@
     <Filter Include="Header Files\Async\Thread">
       <UniqueIdentifier>{92c86e98-6244-4f26-8f32-836e865c3832}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Async\Transport">
+      <UniqueIdentifier>{7cf523b8-b6c0-4146-9046-50a7da81fd5b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -212,9 +215,6 @@
     <ClInclude Include="..\src\Async\Thread\Ticker.h">
       <Filter>Header Files\Async\Thread</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Async\Send.h">
-      <Filter>Header Files\Async</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Async\SuperClass.h">
       <Filter>Header Files\Async</Filter>
     </ClInclude>
@@ -232,6 +232,18 @@
     </ClInclude>
     <ClInclude Include="..\src\Async\Multiplexer.h">
       <Filter>Header Files\Async</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\GradualExecutor.h">
+      <Filter>Header Files\Async</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\SuperclassTicker.h">
+      <Filter>Header Files\Async</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\Transport\Send.h">
+      <Filter>Header Files\Async\Transport</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\Transport\Recv.h">
+      <Filter>Header Files\Async\Transport</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
