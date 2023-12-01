@@ -49,6 +49,9 @@
     <Filter Include="Header Files\Async\Transport">
       <UniqueIdentifier>{7cf523b8-b6c0-4146-9046-50a7da81fd5b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Async\Selector">
+      <UniqueIdentifier>{49f2de90-5e7c-4ce6-94fe-51affecaa356}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -212,11 +215,8 @@
     <ClInclude Include="..\src\MainAsynchronously.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Async\Thread\Ticker.h">
+    <ClInclude Include="..\src\Async\Thread\GameThread.h">
       <Filter>Header Files\Async\Thread</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Async\SuperClass.h">
-      <Filter>Header Files\Async</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Async\PrepareEos.h">
       <Filter>Header Files\Async</Filter>
@@ -224,19 +224,13 @@
     <ClInclude Include="..\src\Async\Thread\Factory.h">
       <Filter>Header Files\Async\Thread</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Async\IMultiplex.h">
-      <Filter>Header Files\Async</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Async\Thread\JThread.h">
       <Filter>Header Files\Async\Thread</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Async\Multiplexer.h">
-      <Filter>Header Files\Async</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Async\GradualExecutor.h">
       <Filter>Header Files\Async</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Async\SuperclassTicker.h">
+    <ClInclude Include="..\src\Async\TickerCore.h">
       <Filter>Header Files\Async</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Async\Transport\Send.h">
@@ -244,6 +238,18 @@
     </ClInclude>
     <ClInclude Include="..\src\Async\Transport\Recv.h">
       <Filter>Header Files\Async\Transport</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\Acceptor.h">
+      <Filter>Header Files\Async</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\Environs.h">
+      <Filter>Header Files\Async</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\Selector\IMultiplex.h">
+      <Filter>Header Files\Async\Selector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\Selector\Multiplexer.h">
+      <Filter>Header Files\Async\Selector</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

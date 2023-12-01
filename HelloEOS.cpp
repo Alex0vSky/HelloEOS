@@ -10,6 +10,7 @@ int main(int argc, char *argv[]) {
 #ifdef _DEBUG
     HeapSetInformation( NULL, HeapEnableTerminationOnCorruption, NULL, NULL );
 	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+	//_CrtSetBreakAlloc( 166 );
 	new char[]{ "Goobay!" };
 #endif
 	(void)argv;
@@ -20,10 +21,12 @@ int main(int argc, char *argv[]) {
 	syscross::HelloEOS::MainAsynchronously main;
 	try {
 		main.run( argc );
-	} catch (std::exception &exc) {
+	} 
+	catch (std::exception &exc) {
 		LOG( "[~] std::exception::what = '%s'", exc.what( ) );
 		LOG( "[~] press [Enter] to exit" );
 		getchar( );
 	}
+	int n = 1'000;
 	return 0;
 }

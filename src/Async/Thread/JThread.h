@@ -1,18 +1,26 @@
 // src\Async\Thread\JThread.h - naive
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
-namespace syscross::HelloEOS::Async::Thread {
-class JThread : public Ticker {
-	std::thread m_thread;
+namespace syscross::HelloEOS::Async::Thread { struct FactoryInfiniteWait; } // forward decl
+namespace syscross::HelloEOS::Async::Thread::detail_ {
+class JThread final : public GameThread {
+	std::future<void> m_future;
 
 public: 
 	JThread(bool isServer) :
-		 Ticker( isServer )
+		 GameThread( isServer )
 	{
-		// TODO(alex): auto future = std::async( task1 ); https://akrzemi1.wordpress.com/2011/09/21/destructors-that-throw/
-		m_thread = std::thread{ &JThread::run_, this };
+		// convenient, but leakage may occur if the process is quickly exited
+		m_future = std::async( &JThread::run_, this );
 	}
 	~JThread() {
-		Ticker::m_bStop = true, m_thread.join( ); // C++20 std::jthread?
+		if ( m_future.valid( ) ) 
+			GameThread::m_bStop = true, m_future.wait( );
+	}
+	bool isValid() const {
+		return GameThread::m_bPrepared;
+	}
+	auto &getFuture() {
+		return m_future;
 	}
 };
-} // namespace syscross::HelloEOS::Async::Thread
+} // namespace syscross::HelloEOS::Async::Thread::detail_

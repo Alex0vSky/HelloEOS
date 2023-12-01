@@ -42,24 +42,16 @@
 #else
 #	define A0S_SetThreadName( name ) do while( false );
 #endif
-namespace syscross::HelloEOS::Async {
-using namespace std::literals::chrono_literals;
-typedef std::future< Networking::messageData_t > future_t;
-// POD/Aggregation
-struct Context {
-	const EOS_HPlatform m_platformHandle;
-	EOS_ProductUserId const m_localUserId, m_friendLocalUserId;
-};
-} // namespace syscross::HelloEOS::Async
+#include "Async/Environs.h"
 #include "Async/PrepareEos.h"
-#include "Async/SuperClass.h"
-#include "Async/IMultiplex.h"
-#include "Async/Multiplexer.h"
+#include "Async/Selector/IMultiplex.h"
+#include "Async/Selector/Multiplexer.h"
 #include "Async/GradualExecutor.h"
+#include "Async/Acceptor.h"
 #include "Async/Transport/Send.h"
 #include "Async/Transport/Recv.h"
-#include "Async/SuperclassTicker.h"
-#include "Async/Thread/Ticker.h"
+#include "Async/TickerCore.h"
+#include "Async/Thread/GameThread.h"
 #include "Async/Thread/JThread.h"
 #include "Async/Thread/Factory.h"
 
@@ -67,25 +59,68 @@ namespace syscross::HelloEOS { struct MainAsynchronously {
 	void run(int argc) {
 		bool isServer = ( argc > 1 );
 
-		auto ticker = Async::Thread::FactoryInfiniteWaiting::createTicker( isServer );
-		if ( !ticker ) 
+		auto oes = Async::Thread::FactoryInfiniteWait::gameThread( isServer );
+		if ( !oes ) 
 			return;
-		auto socketName = "CHAT";
-		std::string text0 = "Hello!";
+		Async::future_t command;
+
+		auto socketNameChat = "CHAT";
+		auto socketNameData = "DATA";
+		std::string text0 = "Hello ";
+		std::string text1 = "World!";
+
+		const size_t vectorSize = ( EOS_P2P_MAX_PACKET_SIZE + 1 );
 
 		if ( isServer ) {
 			LOG( "[~] server" );
-			Async::Transport::Recv recv = ticker ->createReceiver( socketName );
-			Async::future_t commandRecvText = recv.text( text0.length( ) );
-			auto incoming = commandRecvText.get( );
-			std::string text( incoming.begin( ), incoming.end( ) );
+			// Here and in clients back order, or "[LogEOSP2P] Received connection invitation request for unknown socket. LocalUserId=[000...7e5] RemoteUserId=[000...6e2] SocketId=[DATA]"
+			Async::Transport::Recv recvData = oes ->createReceiver( socketNameData );
+			Async::Transport::Recv recvChat = oes ->createReceiver( socketNameChat );
+			Networking::messageData_t incoming;
+			std::string text;
+
+			command = recvChat.byLength( text0.length( ) );
+			incoming = command.get( );
+			text.assign( incoming.begin( ), incoming.end( ) );
 			LOG( "[>>%zd] text: '%s'", incoming.size( ), text.c_str( ) );
+
+			command = recvChat.byLength( text1.length( ) );
+			incoming = command.get( );
+			text.assign( incoming.begin( ), incoming.end( ) );
+			LOG( "[>>%zd] text: '%s'", incoming.size( ), text.c_str( ) );
+
+			command = recvData.byLength( vectorSize );
+			incoming = command.get( );
+			LOG( "[>>%zd] vector", incoming.size( ) );
+			size_t i = 0;
+			for ( ; i < incoming.size( ); ++i ) {
+				auto value = static_cast< Networking::messageData_t::value_type >( i );
+				if ( incoming[ i ] != value ) {
+					LOG( "[~] wrong, 'i' is %zd, but to be %zd", i, value );
+					break;
+				}
+			}
+			LOG( "[~] checking: %s", ( i && ( i >= incoming.size( ) ) ?"true" :"false" ) );
 		} else {
 			LOG( "[~] client" );
-			Async::Transport::Send send = ticker ->createSender( socketName );
-			Async::future_t commandSendText = send.text( text0 );
-			commandSendText.wait( );
+			Async::Transport::Send sendChat = oes ->createSender( socketNameChat );
+
+			command = sendChat.text( text0 );
+			command.wait( );
 			LOG( "[<<%zd] text: '%s'", text0.size( ), text0.c_str( ) );
+			command = sendChat.text( text1 );
+			command.wait( );
+			LOG( "[<<%zd] text: '%s'", text1.size( ), text1.c_str( ) );
+
+			Async::Transport::Send sendData = oes ->createSender( socketNameData );
+			Networking::messageData_t vector( vectorSize );
+			for ( size_t i = 0; i < vector.size( ); ++i ) {
+				auto value = static_cast< Networking::messageData_t::value_type >( i );
+				vector[ i ] = value;
+			}
+			command = sendData.vector( vector );
+			command.wait( );
+			LOG( "[<<%zd] vector", vector.size( ) );
 		}
 
 		LOG( "[~] press [Enter] to exit" );
