@@ -36,7 +36,7 @@ public:
 						, &unused_, &socketId, &channel, std::addressof( *it ), &bytesWritten );
 					if ( EOS_EResult::EOS_Success == result ) {
 						// trace
-						auto str = ( std::stringstream( )<< Hexdump( std::addressof( *it ), bytesWritten ) ).str( ); LOG( "[Recv] '%s' Hexdump of amout bytes: %zd\n%s", socketId.SocketName, bytesWritten, str.c_str( ) );
+						auto str = ( std::stringstream( )<< Hexdump( std::addressof( *it ), bytesWritten ) ).str( ); LOG( "[Recv] '%s' Hexdump of amout bytes: %u\n%s", socketId.SocketName, bytesWritten, str.c_str( ) );
 
 						it += bytesWritten;
 						continue;

@@ -96,7 +96,7 @@ namespace syscross::HelloEOS { struct MainAsynchronously {
 			for ( ; i < incoming.size( ); ++i ) {
 				auto value = static_cast< Networking::messageData_t::value_type >( i );
 				if ( incoming[ i ] != value ) {
-					LOG( "[~] wrong, 'i' is %zd, but to be %zd", i, value );
+					LOG( "[~] wrong, 'i' is %zd, but to be %d", i, value );
 					break;
 				}
 			}

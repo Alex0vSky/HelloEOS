@@ -45,7 +45,7 @@ public:
 
 		// trace
 		auto str = ( std::stringstream( )<< Hexdump( messageData.data( ), messageData.size( ) ) ).str( );
-		LOG( "[receive_] Hexdump of amout bytes: %zd\n%s", bytesWritten, str.c_str( ) );
+		LOG( "[receive_] Hexdump of amout bytes: %u\n%s", bytesWritten, str.c_str( ) );
 
 		return messageData;
 	}
