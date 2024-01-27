@@ -14,21 +14,19 @@ public:
 	{}
 	void all() {
 		using namespace std::literals::chrono_literals;
-		Selector::task_t task;
-		Selector::Direction direction;
-		while ( m_demultiplexer ->pop( &task, &direction ) ) {
-			if ( Selector::Direction::Outgoing == direction ) {
-				task( { } );
+		while ( auto task = m_demultiplexer ->pop( ) ) {
+			if ( Selector::Direction::Outgoing == task ->direction ) {
+				task ->task( { } );
 				::EOS_Platform_Tick( m_platformHandle );
 			}
 			const auto timeout = now( ) + c_commandTO;
-			if ( Selector::Direction::Incoming == direction ) {
+			if ( Selector::Direction::Incoming == task ->direction ) {
 				Selector::task_function_t function( [this, &timeout] { 
 						::EOS_Platform_Tick( m_platformHandle );
 						std::this_thread::sleep_for( 300ms );
 						return ( now( ) < timeout );
 					} );
-				task( function );
+				task ->task( function );
 			}
 		}
 	}

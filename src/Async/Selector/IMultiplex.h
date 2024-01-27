@@ -12,9 +12,13 @@ struct IMux {
 };
 typedef std::shared_ptr< IMux > multiplexer_t;
 
+struct Task {
+	task_t task;
+	Direction direction;
+};
 struct IDemux {
 	virtual ~IDemux() {}
-	virtual bool pop(task_t*, Direction *) = 0;
+	virtual std::optional<Task> pop() = 0;
 };
 typedef std::shared_ptr< IDemux > demultiplex_t;
 } // namespace syscross::HelloEOS::Async::detail_::Selector

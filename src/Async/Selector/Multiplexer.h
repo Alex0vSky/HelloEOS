@@ -2,21 +2,18 @@
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
 namespace syscross::HelloEOS::Async::detail_::Selector { 
 class Multiplexer : public IMux, public IDemux {
-	typedef std::pair< task_t, Direction > queue_item_t;
-	std::queue< queue_item_t > m_tasks;
+	std::queue< Task > m_tasks;
 	std::mutex m_mutex;
 
-	bool pop(task_t *p, Direction *direction) override { 
+	std::optional<Task> pop() override { 
 		if ( m_tasks.empty( ) )
-			return false;
-		queue_item_t x;
+			return std::nullopt;
+		Task task;
 		{ std::lock_guard lock( m_mutex );
-			x = std::move( m_tasks.front( ) );
+			task = std::move( m_tasks.front( ) );
 			m_tasks.pop( );
 		}
-		*p = std::move( x.first );
-		*direction = x.second;
-		return true;
+		return task;
 	}
 
 public:
