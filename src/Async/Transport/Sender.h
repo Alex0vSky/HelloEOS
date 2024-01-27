@@ -10,7 +10,7 @@ class Sender {
 	typedef Networking::messageData_t messageData_t;
 
 	template<typename T>
-	messageData_future_t send_(T const& container) const {
+	command_t send_(T const& container) const {
 		task_t task = 
 			std::packaged_task( [this, container](task_function_t const&) ->messageData_t
 			{

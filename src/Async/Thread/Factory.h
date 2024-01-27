@@ -1,22 +1,28 @@
-// src\Async\Thread\Factory.h - 
-#pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
+// src\Async\Thread\Factory.h - waiting for the "EOS SDK" to initialize until the `clockTimeout`.
+#pragma once // Copyright 2024 Alex0vSky (https://github.com/Alex0vSky)
 namespace syscross::HelloEOS::Async::Thread {
-struct FactoryInfiniteWait {
+struct Factory {
 	typedef std::unique_ptr< detail_::GameThread > gameThread_t;
-	static gameThread_t gameThread(bool isServer) {
+	static gameThread_t create(bool isServer) {
 		using namespace std::literals::chrono_literals;
-		const auto timeout = std::future_status::timeout;
-		// hide JThread from user
-		auto *p = new detail_::JThread( isServer );
-		auto &future = p ->getFuture( );
-		auto gameThread = gameThread_t( p );
+		const auto futureTimeout = std::future_status::timeout;
+		static constexpr auto now = std::chrono::system_clock::now;
+
+		// give out only parent to hide JThread from the user
+		detail_::JThread *async = new detail_::JThread( isServer );
+		gameThread_t gameThread( async );
+
+		// waiting for "EOS SDK" to initialize in a separate thread
+		auto &future = async ->getFuture( );
 		std::future_status stat = std::future_status::ready;
+		auto clockTimeout = now( ) + 15s;
 		while ( true 
-			&& !p ->isValid( )
-			&& ( timeout == ( stat = future.wait_for( 300ms ) ) )
+			&& !async ->isPrepared( )
+			&& now( ) > clockTimeout
+			&& ( futureTimeout == ( stat = future.wait_for( 300ms ) ) )
 		) (void)0;
 
-		if ( timeout == stat )
+		if ( futureTimeout == stat )
 			return gameThread;
 		// void or rethrow exception
 		future.get( );

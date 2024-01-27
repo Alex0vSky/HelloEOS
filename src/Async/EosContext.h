@@ -7,7 +7,7 @@ struct EosContext {
 	EOS_ProductUserId const m_localUserId, m_friendLocalUserId;
 };
 } // namespace detail_
-typedef std::future< Networking::messageData_t > messageData_future_t;
+typedef std::future< Networking::messageData_t > command_t;
 } // namespace syscross::HelloEOS::Async
 
 namespace syscross::HelloEOS::Async::Transport {

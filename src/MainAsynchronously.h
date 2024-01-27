@@ -55,10 +55,10 @@ namespace syscross::HelloEOS { struct MainAsynchronously {
 	void run(int argc) {
 		bool isServer = ( argc > 1 );
 
-		auto oes = Async::Thread::FactoryInfiniteWait::gameThread( isServer );
+		auto oes = Async::Thread::Factory::create( isServer );
 		if ( !oes ) 
 			return;
-		Async::messageData_future_t command;
+		Async::command_t command;
 
 		auto socketNameChat = "CHAT";
 		auto socketNameData = "DATA";

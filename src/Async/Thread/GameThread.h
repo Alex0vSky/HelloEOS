@@ -28,11 +28,11 @@ protected:
 
 public: 
 	virtual ~GameThread() {}
-	Transport::Sender createSender(std::string const& m_socketName) const {
-		return Transport::Sender( m_core ->m_ctx, m_socketName, m_core ->m_multiplexer );
+	Transport::Sender createSender(std::string const& socketName) const {
+		return Transport::Sender( m_core ->m_ctx, socketName, m_core ->m_multiplexer );
 	}
-	Transport::Recv createReceiver(std::string const& m_socketName) const {
-		return Transport::Recv( m_core ->m_ctx, m_socketName, m_core ->m_multiplexer );
+	Transport::Recv createReceiver(std::string const& socketName) const {
+		return Transport::Recv( m_core ->m_ctx, socketName, m_core ->m_multiplexer );
 	}
 };
 } // namespace syscross::HelloEOS::Async::Thread::detail_

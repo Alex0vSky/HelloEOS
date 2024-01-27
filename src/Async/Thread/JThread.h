@@ -16,7 +16,7 @@ public:
 		if ( m_future.valid( ) ) 
 			GameThread::m_bStop = true, m_future.wait( );
 	}
-	bool isValid() const {
+	bool isPrepared() const {
 		return GameThread::m_bPrepared;
 	}
 	auto &getFuture() {
