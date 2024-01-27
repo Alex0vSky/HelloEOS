@@ -49,16 +49,19 @@ public:
 
 			EOS_Auth_LoginOptions Options = { };
 			Options.ApiVersion = EOS_AUTH_LOGIN_API_LATEST;
-			EOS_EAuthScopeFlags DefaultLoginScope = EOS_EAuthScopeFlags::EOS_AS_BasicProfile | EOS_EAuthScopeFlags::EOS_AS_FriendsList | EOS_EAuthScopeFlags::EOS_AS_Presence;
+			EOS_EAuthScopeFlags DefaultLoginScope = EOS_EAuthScopeFlags::EOS_AS_NoFlags
+				| EOS_EAuthScopeFlags::EOS_AS_BasicProfile 
+				| EOS_EAuthScopeFlags::EOS_AS_FriendsList 
+				| EOS_EAuthScopeFlags::EOS_AS_Presence;
 			Options.ScopeFlags = DefaultLoginScope;
 
 			Options.Credentials = &Credentials;
+			// TODO(alex): from command line, not hardcode
 			Credentials.Id = "localhost:10000";
 			Credentials.Token = Token.c_str( );
 			Credentials.Type = EOS_ELoginCredentialType::EOS_LCT_Developer;
-			LOG( "[Auth/Synchronously] Logging In with Host: %s", Credentials.Id );
+			LOG( "[Auth/Synchronously] Logging In with Host: '%s' on '%s'", Credentials.Id, Token.c_str( ) );
 
-			::SetLastError( 0 );
 			m_bSuccess = false;
 			m_bError = false;
 			::EOS_Auth_Login( AuthHandle, &Options, this, LoginCompleteCallbackFn );
@@ -76,12 +79,14 @@ public:
 		} while ( !m_bSuccess && !m_bError );
 		if ( m_bError ) 
 			return false;
-
 		LOG( "[Auth/Synchronously] Connect Login - User ID: %s", HumanReadable::EpicAccountIDToString_( m_Account ) );
+
 		EOS_Auth_Token* UserAuthToken = nullptr;
 		EOS_Auth_CopyUserAuthTokenOptions CopyTokenOptions = { };
 		CopyTokenOptions.ApiVersion = EOS_AUTH_COPYUSERAUTHTOKEN_API_LATEST;
-		if ( EOS_EResult::EOS_Success != ::EOS_Auth_CopyUserAuthToken( AuthHandle, &CopyTokenOptions, m_Account, &UserAuthToken ) )
+		EOS_EResult eResult;
+		eResult = ::EOS_Auth_CopyUserAuthToken( AuthHandle, &CopyTokenOptions, m_Account, &UserAuthToken );
+		if ( EOS_EResult::EOS_Success != eResult )
 			return false;
 		EOS_Connect_Credentials Credentials = { };
 		Credentials.ApiVersion = EOS_CONNECT_CREDENTIALS_API_LATEST;

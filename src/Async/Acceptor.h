@@ -54,7 +54,7 @@ class Acceptor {
 	}
 
 public:
-	Acceptor(Environs const&ctx, std::string const& socketName) :
+	Acceptor(EosContext const&ctx, std::string const& socketName) :
 		m_localUserId( ctx.m_localUserId )
 		, m_socketName( socketName )
 		, m_p2PHandle( ::EOS_Platform_GetP2PInterface( ctx.m_platformHandle ) )

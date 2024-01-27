@@ -195,7 +195,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>A0S_BENCH_P2P;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalIncludeDirectories>src;..\_msvcStuff;..\src;..\resource;C:\Prj\_L\3d\EOS_SDK\SDK\Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -276,7 +276,7 @@
     <ClInclude Include="..\src\Anchronously\Receive\Chat.h" />
     <ClInclude Include="..\src\Anchronously\Send\Chat.h" />
     <ClInclude Include="..\src\Async\Acceptor.h" />
-    <ClInclude Include="..\src\Async\Environs.h" />
+    <ClInclude Include="..\src\Async\EosContext.h" />
     <ClInclude Include="..\src\Async\GradualExecutor.h" />
     <ClInclude Include="..\src\Async\PrepareEos.h" />
     <ClInclude Include="..\src\Async\Selector\IMultiplex.h" />
@@ -286,8 +286,9 @@
     <ClInclude Include="..\src\Async\Thread\JThread.h" />
     <ClInclude Include="..\src\Async\Thread\GameThread.h" />
     <ClInclude Include="..\src\Async\Transport\Recv.h" />
-    <ClInclude Include="..\src\Async\Transport\Send.h" />
+    <ClInclude Include="..\src\Async\Transport\Sender.h" />
     <ClInclude Include="..\src\Credentials\Hardcode.h" />
+    <ClInclude Include="..\src\Credentials\Private.h" />
     <ClInclude Include="..\src\Deferred\Action.h" />
     <ClInclude Include="..\src\Deferred\ConnectionRequestListener\AcceptEveryone.h" />
     <ClInclude Include="..\src\Deferred\ConnectionRequestListener\AcceptEveryoneConnectionAware.h" />

@@ -1,8 +1,8 @@
-// src\Async\Transport\Send.h - only for single filling eos queue, without flush
+// src\Async\Transport\Sender.h - only for single filling eos queue, without flush
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
 namespace syscross::HelloEOS::Async::Transport {
-class Send {
-	multiplex_t m_multiplexer; // shared_ptr to avoid dangling
+class Sender {
+	multiplexer_t m_multiplexer; // shared_ptr to avoid dangling
 	const EOS_HP2P m_p2PHandle;
 	EOS_P2P_SendPacketOptions m_options{ EOS_P2P_SENDPACKET_API_LATEST };
 	EOS_P2P_SocketId m_sendSocketId{ EOS_P2P_SOCKETID_API_LATEST };
@@ -10,9 +10,9 @@ class Send {
 	typedef Networking::messageData_t messageData_t;
 
 	template<typename T>
-	future_t send_(T const& container) const {
+	messageData_future_t send_(T const& container) const {
 		task_t task = 
-			std::packaged_task( [this, container](task_arg_t const&) ->messageData_t
+			std::packaged_task( [this, container](task_function_t const&) ->messageData_t
 			{
 				const size_t maxDataLengthBytes = Networking::c_MaxDataSizeBytes;
 				auto it = container.begin( );
@@ -25,7 +25,11 @@ class Send {
 					EOS_P2P_SendPacketOptions options = m_options;
 					options.DataLengthBytes = static_cast< uint32_t >( dataLengthBytes );
 					options.Data = std::addressof( *it );
+//#ifdef A0S_BENCH_P2P
+//					EOS_EResult result = EOS_Success;
+//#else // A0S_BENCH_P2P
 					EOS_EResult result = ::EOS_P2P_SendPacket( m_p2PHandle, &options );
+//#endif // A0S_BENCH_P2P
 					if ( EOS_EResult::EOS_Success != result )
 						throw std::runtime_error( "error EOS_P2P_SendPacket" );
 					it += dataLengthBytes;
@@ -33,12 +37,12 @@ class Send {
 				return { };
 			} );
 		auto future = task.get_future( );
-		m_multiplexer ->outgoing( std::move( task ) );
+		m_multiplexer ->push_outgoing( std::move( task ) );
 		return future;
 	}
 
 public:
-	Send(Environs const& ctx, std::string const& socketName, multiplex_t const& mux) :
+	Sender(EosContext const& ctx, std::string const& socketName, multiplexer_t const& mux) :
 		m_multiplexer( mux )
 		, m_p2PHandle( ::EOS_Platform_GetP2PInterface( ctx.m_platformHandle ) )
 		, m_acceptor( ctx, socketName )
@@ -52,10 +56,10 @@ public:
 		m_options.Reliability = EOS_EPacketReliability::EOS_PR_ReliableOrdered;
 		m_options.bDisableAutoAcceptConnection = EOS_FALSE;
 	}
-	auto text(std::string const& text) const {
+	auto sendText(std::string const& text) const {
 		return send_( text );
 	}
-	auto vector(messageData_t const& vector) const {
+	auto sendVector(messageData_t const& vector) const {
 		return send_( vector );
 	}
 };

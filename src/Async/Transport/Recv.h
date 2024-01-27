@@ -2,7 +2,7 @@
 #pragma once // Copyright 2023 Alex0vSky (https://github.com/Alex0vSky)
 namespace syscross::HelloEOS::Async::Transport {
 class Recv {
-	multiplex_t m_multiplexer; // shared_ptr to avoid dangling
+	multiplexer_t m_multiplexer; // shared_ptr to avoid dangling
 	const uint8_t m_channel;
 	const EOS_HP2P m_p2PHandle;
 	const uint8_t* m_requestedChannel = &m_channel;
@@ -11,7 +11,7 @@ class Recv {
 	typedef Networking::messageData_t messageData_t;
 
 public:
-	Recv(Environs const& ctx, std::string const& socketName, multiplex_t const& mux) :
+	Recv(EosContext const& ctx, std::string const& socketName, multiplexer_t const& mux) :
 		m_multiplexer( mux )
 		, m_channel( 0 ) // zero for simplicity
 		, m_p2PHandle( ::EOS_Platform_GetP2PInterface( ctx.m_platformHandle ) )
@@ -23,7 +23,7 @@ public:
 	}
 	[[nodiscard]] auto byLength(size_t len) const {
 		task_t task = 
-			std::packaged_task( [this, len](task_arg_t const& tick) ->messageData_t
+			std::packaged_task( [this, len](task_function_t const& tick) ->messageData_t
 			{
 				EOS_ProductUserId unused_;
 				EOS_P2P_SocketId socketId;
@@ -49,7 +49,7 @@ public:
 				return container;
 			} );
 		auto future = task.get_future( );
-		m_multiplexer ->incoming( std::move( task ) );
+		m_multiplexer ->push_incoming( std::move( task ) );
 		return future;
 	}
 };

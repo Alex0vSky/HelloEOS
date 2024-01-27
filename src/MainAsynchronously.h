@@ -19,7 +19,13 @@
 #include "Version.h"
 #include "Log.h"
 #include "HumanReadable.h"
-#include "Credentials/Hardcode.h"
+#if __has_include( "Credentials/Private.h" )
+#	include "Credentials/Private.h"
+#else
+#	pragma message( "Please insert in 'Hardcode.h' content from \
+your own 'dev.epicgames.com/portal', or there will be '5 unresolved externals'" )
+#	include "Credentials/Hardcode.h"
+#endif
 #include "InitializeEOS.h"
 #include "Networking.h"
 #include "Synchronously/Auth.h"
@@ -27,28 +33,18 @@
 #include "Synchronously/AccountMapping.h"
 #include "Synchronously/Presence.h"
 #include "Synchronously/PresenceQueryable.h"
-#include "Deferred/Ctx.h"
-#include "Deferred/ConnectionRequestListener/AcceptEveryone.h"
-#include "Deferred/ConnectionRequestListener/AcceptEveryoneConnectionAware.h"
-#include "Deferred/QueueCommands.h"
-#include "Deferred/Action.h"
-#include "Deferred/Sender/SendText.h"
-#include "Deferred/Receiver/RecvText.h"
-#include "Deferred/Sending.h"
-#include "Deferred/Receiving.h"
-#include "Deferred/PingPonger.h"
 #ifdef _DEBUG
 #	define A0S_SetThreadName( name ) ::SetThreadDescription( ::GetCurrentThread( ), L##name );
 #else
 #	define A0S_SetThreadName( name ) do while( false );
 #endif
-#include "Async/Environs.h"
+#include "Async/EosContext.h"
 #include "Async/PrepareEos.h"
 #include "Async/Selector/IMultiplex.h"
 #include "Async/Selector/Multiplexer.h"
 #include "Async/GradualExecutor.h"
 #include "Async/Acceptor.h"
-#include "Async/Transport/Send.h"
+#include "Async/Transport/Sender.h"
 #include "Async/Transport/Recv.h"
 #include "Async/TickerCore.h"
 #include "Async/Thread/GameThread.h"
@@ -62,7 +58,7 @@ namespace syscross::HelloEOS { struct MainAsynchronously {
 		auto oes = Async::Thread::FactoryInfiniteWait::gameThread( isServer );
 		if ( !oes ) 
 			return;
-		Async::future_t command;
+		Async::messageData_future_t command;
 
 		auto socketNameChat = "CHAT";
 		auto socketNameData = "DATA";
@@ -103,22 +99,22 @@ namespace syscross::HelloEOS { struct MainAsynchronously {
 			LOG( "[~] checking: %s", ( i && ( i >= incoming.size( ) ) ?"true" :"false" ) );
 		} else {
 			LOG( "[~] client" );
-			Async::Transport::Send sendChat = oes ->createSender( socketNameChat );
+			Async::Transport::Sender sendChat = oes ->createSender( socketNameChat );
 
-			command = sendChat.text( text0 );
+			command = sendChat.sendText( text0 );
 			command.wait( );
 			LOG( "[<<%zd] text: '%s'", text0.size( ), text0.c_str( ) );
-			command = sendChat.text( text1 );
+			command = sendChat.sendText( text1 );
 			command.wait( );
 			LOG( "[<<%zd] text: '%s'", text1.size( ), text1.c_str( ) );
 
-			Async::Transport::Send sendData = oes ->createSender( socketNameData );
+			Async::Transport::Sender sendData = oes ->createSender( socketNameData );
 			Networking::messageData_t vector( vectorSize );
 			for ( size_t i = 0; i < vector.size( ); ++i ) {
 				auto value = static_cast< Networking::messageData_t::value_type >( i );
 				vector[ i ] = value;
 			}
-			command = sendData.vector( vector );
+			command = sendData.sendVector( vector );
 			command.wait( );
 			LOG( "[<<%zd] vector", vector.size( ) );
 		}

@@ -233,7 +233,7 @@
     <ClInclude Include="..\src\Async\TickerCore.h">
       <Filter>Header Files\Async</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Async\Transport\Send.h">
+    <ClInclude Include="..\src\Async\Transport\Sender.h">
       <Filter>Header Files\Async\Transport</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Async\Transport\Recv.h">
@@ -242,7 +242,7 @@
     <ClInclude Include="..\src\Async\Acceptor.h">
       <Filter>Header Files\Async</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Async\Environs.h">
+    <ClInclude Include="..\src\Async\EosContext.h">
       <Filter>Header Files\Async</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Async\Selector\IMultiplex.h">
@@ -250,6 +250,9 @@
     </ClInclude>
     <ClInclude Include="..\src\Async\Selector\Multiplexer.h">
       <Filter>Header Files\Async\Selector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Credentials\Private.h">
+      <Filter>Header Files\Credentials</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

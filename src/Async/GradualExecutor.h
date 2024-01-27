@@ -8,7 +8,7 @@ class GradualExecutor {
 	static constexpr auto now = std::chrono::system_clock::now;
 
 public:
-	GradualExecutor(Selector::demultiplex_t const& demultiplexer, Environs const& ctx) :
+	GradualExecutor(Selector::demultiplex_t const& demultiplexer, EosContext const& ctx) :
 		m_demultiplexer( demultiplexer )
 		, m_platformHandle( ctx.m_platformHandle )
 	{}
@@ -23,7 +23,7 @@ public:
 			}
 			const auto timeout = now( ) + c_commandTO;
 			if ( Selector::Direction::Incoming == direction ) {
-				Selector::task_arg_t function( [this, &timeout] { 
+				Selector::task_function_t function( [this, &timeout] { 
 						::EOS_Platform_Tick( m_platformHandle );
 						std::this_thread::sleep_for( 300ms );
 						return ( now( ) < timeout );

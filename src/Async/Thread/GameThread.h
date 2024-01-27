@@ -28,8 +28,8 @@ protected:
 
 public: 
 	virtual ~GameThread() {}
-	Transport::Send createSender(std::string const& m_socketName) const {
-		return Transport::Send( m_core ->m_ctx, m_socketName, m_core ->m_multiplexer );
+	Transport::Sender createSender(std::string const& m_socketName) const {
+		return Transport::Sender( m_core ->m_ctx, m_socketName, m_core ->m_multiplexer );
 	}
 	Transport::Recv createReceiver(std::string const& m_socketName) const {
 		return Transport::Recv( m_core ->m_ctx, m_socketName, m_core ->m_multiplexer );

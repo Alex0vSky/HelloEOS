@@ -47,9 +47,8 @@ public:
 		PlatformOptions.EncryptionKey = SampleConstants::EncryptionKey;
 		PlatformOptions.OverrideCountryCode = nullptr;
 		PlatformOptions.OverrideLocaleCode = nullptr;
-		// Enable overlay support for D3D9/10 and OpenGL. This sample uses D3D11 or SDL.
+		// Disable overlay support
 		PlatformOptions.Flags = 
-			// EOS_PF_WINDOWS_ENABLE_OVERLAY_D3D9 | EOS_PF_WINDOWS_ENABLE_OVERLAY_D3D10 | EOS_PF_WINDOWS_ENABLE_OVERLAY_OPENGL; 
 			EOS_PF_DISABLE_OVERLAY | EOS_PF_DISABLE_SOCIAL_OVERLAY;
 		PlatformOptions.CacheDirectory = "C:\\Temp\\";
 
