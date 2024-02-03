@@ -13,6 +13,8 @@ int main(int argc, char *argv[]) {
 	//_CrtSetBreakAlloc( 166 );
 	new char[]{ "Goobay!" };
 #endif
+	// for `boost::system::error_code::message` language
+	setlocale( 0, "" );
 	(void)argv;
 	//syscross::HelloEOS::MainSynchronously main;
 	//syscross::HelloEOS::MainAnchronously main;

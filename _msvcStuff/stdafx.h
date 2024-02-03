@@ -2,6 +2,7 @@
 
 // System
 #define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <intrin.h>
 
@@ -80,5 +81,10 @@
 
 #pragma warning( pop )
 #endif // A0S_GRPC
+
+// Boost::Asio
+#ifdef A0S_BENCH_P2P
+#include <boost/asio.hpp>
+#endif // A0S_BENCH_P2P
 
 #include "ThirdParty/Hexdump.hpp"

@@ -44,12 +44,22 @@ your own 'dev.epicgames.com/portal', or there will be '5 unresolved externals'" 
 #include "Async/Selector/Multiplexer.h"
 #include "Async/GradualExecutor.h"
 #include "Async/Acceptor.h"
+#ifdef A0S_BENCH_P2P
+#include "Async/_Bench/Transport.h"
+#else // A0S_BENCH_P2P
 #include "Async/Transport/Sender.h"
 #include "Async/Transport/Recv.h"
+#endif // A0S_BENCH_P2P
 #include "Async/TickerCore.h"
 #include "Async/Thread/GameThread.h"
 #include "Async/Thread/JThread.h"
+#ifdef A0S_BENCH_P2P
+#include <src/aliases.h>
+#include <src/Command.h>
+#include "Async/_Bench/Thread/Factory.h"
+#else // A0S_BENCH_P2P
 #include "Async/Thread/Factory.h"
+#endif // A0S_BENCH_P2P
 
 namespace syscross::HelloEOS { struct MainAsynchronously {
 	void run(int argc) {
@@ -58,6 +68,11 @@ namespace syscross::HelloEOS { struct MainAsynchronously {
 		auto oes = Async::Thread::Factory::create( isServer );
 		if ( !oes ) 
 			return;
+
+		//while ( true ) {
+		//	std::this_thread::sleep_for( std::chrono::milliseconds{ 300 } );
+		//}
+
 		Async::command_t command;
 
 		auto socketNameChat = "CHAT";

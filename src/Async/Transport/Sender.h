@@ -25,11 +25,7 @@ class Sender {
 					EOS_P2P_SendPacketOptions options = m_options;
 					options.DataLengthBytes = static_cast< uint32_t >( dataLengthBytes );
 					options.Data = std::addressof( *it );
-//#ifdef A0S_BENCH_P2P
-//					EOS_EResult result = EOS_Success;
-//#else // A0S_BENCH_P2P
 					EOS_EResult result = ::EOS_P2P_SendPacket( m_p2PHandle, &options );
-//#endif // A0S_BENCH_P2P
 					if ( EOS_EResult::EOS_Success != result )
 						throw std::runtime_error( "error EOS_P2P_SendPacket" );
 					it += dataLengthBytes;

@@ -197,7 +197,7 @@
     <ClCompile>
       <PreprocessorDefinitions>A0S_BENCH_P2P;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>src;..\_msvcStuff;..\src;..\resource;C:\Prj\_L\3d\EOS_SDK\SDK\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;..\_msvcStuff;..\src;..\resource;C:\Prj\_L\3d\EOS_SDK\SDK\Include;C:\Prj\_L;C:\Prj\syscross\BenchP2p;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -270,6 +270,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\_L\boost\config\user.hpp" />
     <ClInclude Include="..\resource\resource.h" />
     <ClInclude Include="..\src\Anchronously\Acme.h" />
     <ClInclude Include="..\src\Anchronously\Ping.h" />
@@ -287,6 +288,8 @@
     <ClInclude Include="..\src\Async\Thread\GameThread.h" />
     <ClInclude Include="..\src\Async\Transport\Recv.h" />
     <ClInclude Include="..\src\Async\Transport\Sender.h" />
+    <ClInclude Include="..\src\Async\_Bench\Thread\Factory.h" />
+    <ClInclude Include="..\src\Async\_Bench\Transport.h" />
     <ClInclude Include="..\src\Credentials\Hardcode.h" />
     <ClInclude Include="..\src\Credentials\Private.h" />
     <ClInclude Include="..\src\Deferred\Action.h" />

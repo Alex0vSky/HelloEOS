@@ -52,6 +52,15 @@
     <Filter Include="Header Files\Async\Selector">
       <UniqueIdentifier>{49f2de90-5e7c-4ce6-94fe-51affecaa356}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Async\_Bench">
+      <UniqueIdentifier>{1ebd2991-03a3-43c0-8301-9ed5532d048f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Async\_Bench\Thread">
+      <UniqueIdentifier>{8621be8e-e89a-4408-83b8-f2dce93a03c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Async\_Bench\_BoostConfig">
+      <UniqueIdentifier>{ca95abdc-96fb-43b9-9f8d-2f9b9057d154}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -253,6 +262,15 @@
     </ClInclude>
     <ClInclude Include="..\src\Credentials\Private.h">
       <Filter>Header Files\Credentials</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\_Bench\Transport.h">
+      <Filter>Header Files\Async\_Bench</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Async\_Bench\Thread\Factory.h">
+      <Filter>Header Files\Async\_Bench\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\_L\boost\config\user.hpp">
+      <Filter>Header Files\Async\_Bench\_BoostConfig</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
