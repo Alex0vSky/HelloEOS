@@ -107,11 +107,13 @@ namespace syscross::HelloEOS { struct MainAsynchronously {
 			for ( ; i < incoming.size( ); ++i ) {
 				auto value = static_cast< Networking::messageData_t::value_type >( i );
 				if ( incoming[ i ] != value ) {
-					LOG( "[~] wrong, 'i' is %zd, but to be %d", i, value );
+					LOG( "[~] wrong, incoming[ %zd ]=%d, but need %d", i, incoming[ i ], value );
 					break;
 				}
 			}
 			LOG( "[~] checking: %s", ( i && ( i >= incoming.size( ) ) ?"true" :"false" ) );
+			LOG( "[~] press [Enter] to exit" );
+			getchar( );
 		} else {
 			LOG( "[~] client" );
 			Async::Transport::Sender sendChat = oes ->createSender( socketNameChat );
@@ -132,10 +134,10 @@ namespace syscross::HelloEOS { struct MainAsynchronously {
 			command = sendData.sendVector( vector );
 			command.wait( );
 			LOG( "[<<%zd] vector", vector.size( ) );
+			LOG( "[~] press [Enter] to exit" );
+			getchar( );
 		}
 
-		LOG( "[~] press [Enter] to exit" );
-		getchar( );
 		return;
 	}
 };

@@ -85,6 +85,7 @@
 // Boost::Asio
 #ifdef A0S_BENCH_P2P
 #include <boost/asio.hpp>
+#include <boost/exception/diagnostic_information.hpp>
 #endif // A0S_BENCH_P2P
 
 #include "ThirdParty/Hexdump.hpp"

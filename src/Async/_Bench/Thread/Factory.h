@@ -33,12 +33,19 @@ struct Factory {
 						m_socket.receive( boost::asio::buffer( data ), tcp::socket::message_peek, error_code );
 						if ( error_code.failed( ) ) {
 							__nop( );
+							break;
 						}
 						std::this_thread::sleep_for( std::chrono::milliseconds{ 300 } );
 					}
+					//// TODO(alex): try `socket ->async_wait( tcp::socket::wait_error, ... );`
+					//m_socket.async_wait( tcp::socket::wait_error, [](const boost::system::error_code& error) {
+					//		__nop( );
+					//	} );
+					//__nop( );
 				} )
 		{}
 		~MockGameThread() {
+			m_socket.close( );
 			m_thread.join( );
 		}
 		Transport::Sender createSender(std::string const& socketName) {
@@ -49,15 +56,19 @@ struct Factory {
 		}
 	};
 	static auto create(bool) {
+		using namespace BenchP2p;
 		uptrIoContext_t ioContext = std::make_unique< boost::asio::io_context >( 1 );
 		tcp::socket socket( *ioContext );
 		USHORT port = 55555;
 		socket.connect( { boost::asio::ip::address_v4::loopback( ), port } );
-		BenchP2p::data_t data;
-		using namespace BenchP2p;
+		BenchP2p::Command::type data;
 		while ( true ) {
-			socket.send( boost::asio::buffer( BenchP2p::Command::Pair::Hello_ ) );
-			socket.receive( boost::asio::buffer( data ) );
+			socket.send( buffer( BenchP2p::Command::Pair::Hello_ ) );
+			size_t len = socket.receive( buffer( data ) );
+
+			// trace
+			auto str = ( std::stringstream( )<< Hexdump( data.data( ), len ) ).str( ); LOG( "[Recv] '%s' Hexdump of amout bytes: %zu\n%s", "SocketName", len, str.c_str( ) );
+
 			if ( BenchP2p::Command::Pair::Ready_ == data )
 				break;
 			std::this_thread::sleep_for( std::chrono::milliseconds{ 300 } );
