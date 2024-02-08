@@ -14,6 +14,7 @@ Useful for indie multiplayer games.
 - [-] ([declined](https://eoshelp.epicgames.com/s/question/0D5QP000002TQJ40AO/p2p-relay-bandwidth-meter-limits-and-permissions?language=en_US))more responsible bandwidth measurement
 - [x] async
 - [x] [Bench/Stand](https://github.com/Alex0vSky/BenchEosP2p)
+- [x] blogpost
 - [ ] Clean up the code
 - [ ] Use the library in a simple multiplayer game
 - [ ] UnrealEngine UObject-s Serialize/Deserialize, replication
