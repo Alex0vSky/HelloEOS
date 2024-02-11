@@ -16,7 +16,7 @@ Useful for indie multiplayer games.
 - [x] [Bench/Stand](https://github.com/Alex0vSky/BenchEosP2p)
 - [x] blogpost
 - [ ] Clean up the code
-- [ ] Use the library in a simple multiplayer game
+- [ ] Use the library in a simple multiplayer game, [BattleCity](https://github.com/Alex0vSky/BattleCityEos)
 - [ ] UnrealEngine UObject-s Serialize/Deserialize, replication
 - [ ] Python version
 
